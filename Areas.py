@@ -2,6 +2,7 @@ class Terrain:
     def __init__(self, tiles, name):
         self.tiles = tiles
         self.name = name
+        print(f"Created new {self.__class__.__name__} ({name})")
 
 class River(Terrain):
     def __init__(self, tiles, name) -> None:

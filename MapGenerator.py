@@ -1,31 +1,18 @@
+from ctypes import pointer
 import random
-import pygame
+from tokenize import Name
 import matplotlib.pyplot as plt
 from perlin_noise import PerlinNoise
 import numpy as np
 from Tiles import *
 from Areas import *
-import time
-import string
+from settings import *
+from NameGenerator import NameGenerator
 
-SIZE_TILES = (100, 100)
-
-HEIGHT_COLORS = [
-    [-1.0, np.array([0,0,0])/255],
-    [0, np.array([0,0,255])/255],
-    [0, np.array([0,255,0])/255],
-    [.3, np.array([255,255,0])/255],
-    [.4, np.array([255,70,0])/255],
-    [1.0, np.array([0,0,0])/255]
-]
 
 class MapGenerator:
     def __init__(self) -> None:
-        pass
-
-    # def Generate(self, x_dim: int, y_dim: int, mode: str):
-    #     self.x_dim = x_dim
-    #     self.y_dim = y_dim
+        self.name_generator = NameGenerator()
 
     def __dist_from_edge(self, x, y, xSize, ySize, mode = ''):
         if mode == 'square':
@@ -40,11 +27,8 @@ class MapGenerator:
             return 1.0
 
     def dist(self, x1, y1, x2, y2):
-        #print(f"dist {x1, y1} {x2,y2} = {((x1-x2)**2 + (y1-y2)**2)**.5}")
         return ((x1-x2)**2 + (y1-y2)**2)**.5
-        # print(f"{x}, {y} => {-((xSize/2 - x)**2 + (ySize/2 - y)**2)**.5} / {min(xSize/2 - abs(x - xSize / 2) + .01, ySize/2 - abs(y - ySize / 2) + .01)}")
-        # return 1.0 - ((xSize/2 - x)**2 + (ySize/2 - y)**2)**.5/min(xSize/2 - abs(x - xSize / 2) + 1/32, ySize/2 - abs(y - ySize / 2) + 1/32)
-
+        
     def __pick_color(self, h):
         if type(h) == list:
             return [self.__pick_color(h2) for h2 in h]
@@ -56,15 +40,8 @@ class MapGenerator:
                     break
             return color1 + (color2 - color1) * (h - h1) / (h2 - h1)
 
-    def generate_random_name(self):
-        return ''.join(random.choice(string.ascii_lowercase) for i in range(random.randint(4,10)))
-
     def generate_map(self, x_dim, y_dim, mode = ''):
-        self.seas = []
-        self.lakes = []
-        self.rivers = []
-        self.continents = []
-        self.islands = []
+        self.areas = {area_type: [] for area_type in ['lakes', 'seas', 'rivers', 'continents', 'islands', 'mountains']}
 
         self.x_dim, self.y_dim = x_dim, y_dim
         self.world_map = []
@@ -86,54 +63,96 @@ class MapGenerator:
             self.world_map.append(row)
             self.color_map.append(self.__pick_color(row))
 
-        self.find_seas()
-        self.find_lands()
-        #self.show_map()
-        self.create_rivers(self.create_sources())
+        # self.find_seas()
+        # self.find_lands()
+        # self.find_mountains()
+        
+        # self.create_rivers(self.create_sources())
+        self.generate_areas()
         print('Map generating done')
 
-    def find_seas(self):
-        below_0 = [(x,y) for x in range(self.x_dim) for y in range(self.y_dim) if self.world_map[x][y]['height'] < 0]
-        while len(below_0) > 0:
-            to_visit = [below_0[random.randint(0, len(below_0)-1)]]
-            sea_tiles = []
-            while len(to_visit) > 0:
-                point = to_visit.pop(0)
-                if point in below_0:
-                    below_0.remove(point)
-                    sea_tiles.append(point)
-                    for tile in self.get_adjacent(point[0], point[1]): to_visit.append(tile)
-            type_of_water = len(sea_tiles) < 20 and 'Lake' or 'Sea'
-            if type_of_water == 'Lake':
-                self.lakes.append(Lake(sea_tiles, self.generate_random_name()))
+    def generate_areas(self):
+        water = self.find_areas(lambda x: x < 0)
+        lands = self.find_areas(lambda x: x >= 0)
+        mountains = self.find_areas(lambda x: x > 3.5)
+        rivers = self.create_rivers(self.create_sources())
+
+        for area in water:
+            if len(area) <= LAKE_MAX_SIZE:
+                self.areas['lakes'].append(Lake(area, self.name_generator.generate_name('lakes')))
             else:
-                self.seas.append(Sea(sea_tiles, self.generate_random_name()))
+                self.areas['seas'].append(Sea(area, self.name_generator.generate_name('seas')))
 
-            print(f"\nNew {type_of_water}: {sea_tiles=}")
+        for area in lands:
+            if len(area) <= ISLAND_MAX_SIZE:
+                self.areas['islands'].append(Island(area, self.name_generator.generate_name('islands')))
+            else:
+                self.areas['continents'].append(Continent(area, self.name_generator.generate_name('continents')))
 
-    def find_lands(self):
-        below_0 = [(x,y) for x in range(self.x_dim) for y in range(self.y_dim) if self.world_map[x][y]['height'] >= 0]
-        while len(below_0) > 0:
-            to_visit = [below_0[random.randint(0, len(below_0)-1)]]
+        for area in mountains:
+            self.areas['mountains'].append(Mountain(area, self.name_generator.generate_name('mountains')))
+
+    # def find_areas(self, condition):
+    #     all_tiles = [(x,y) for x in range(self.x_dim) for y in range(self.y_dim) if condition(self.world_map[x][y]['height'])]
+    #     areas = []
+    #     while len(all_tiles) > 0:
+    #         to_visit = [all_tiles[0]]
+    #         area_tiles = []
+    #         while (len(to_visit)) > 0:
+    #             point = to_visit.pop(0)
+    #             if point in all_tiles:
+    #                 all_tiles.remove(point)
+    #                 area_tiles.append(point)
+    #                 for tile in self.get_adjacent(point[0], point[1]): to_visit.append(tile)
+    #         areas.append(area_tiles)
+    #     return areas
+
+    # def find_seas(self):
+    #     below_0 = [(x,y) for x in range(self.x_dim) for y in range(self.y_dim) if self.world_map[x][y]['height'] < 0]
+    #     while len(below_0) > 0:
+    #         to_visit = [below_0[random.randint(0, len(below_0)-1)]]
+    #         sea_tiles = []
+    #         while len(to_visit) > 0:
+    #             point = to_visit.pop(0)
+    #             if point in below_0:
+    #                 below_0.remove(point)
+    #                 sea_tiles.append(point)
+    #                 for tile in self.get_adjacent(point[0], point[1]): to_visit.append(tile)
+    #         type_of_water = len(sea_tiles) < 40 and 'lakes' or 'seas'
+    #         self.areas[type_of_water].append(Lake(sea_tiles, self.name_generator.generate_name(type_of_water)))
+    #         # else:
+    #         #     self.areas[type_of_water].append(Sea(sea_tiles, self.name_generator.generate_name('seas')))
+
+    # def find_lands(self):
+    #     over_0 = [(x,y) for x in range(self.x_dim) for y in range(self.y_dim) if self.world_map[x][y]['height'] >= 0]
+    #     while len(over_0) > 0:
+    #         to_visit = [over_0[random.randint(0, len(over_0)-1)]]
+    #         land_tiles = []
+    #         while len(to_visit) > 0:
+    #             point = to_visit.pop(0)
+    #             if point in over_0:
+    #                 over_0.remove(point)
+    #                 land_tiles.append(point)
+    #                 for tile in self.get_adjacent(point[0], point[1]): to_visit.append(tile)
+    #         type_of_land = len(land_tiles) < 100 and 'islands' or 'continents'
+    #         self.areas[type_of_land].append(Lake(land_tiles, self.name_generator.generate_name(type_of_land)))
+
+    def find_mountains(self):
+        over_35 = [(x,y) for x in range(self.x_dim) for y in range(self.y_dim) if self.world_map[x][y]['height'] >= 0.4]
+        while len(over_35) > 0:
+            to_visit = [over_35[random.randint(0, len(over_35)-1)]]
             land_tiles = []
             while len(to_visit) > 0:
                 point = to_visit.pop(0)
-                if point in below_0:
-                    below_0.remove(point)
+                if point in over_35:
+                    over_35.remove(point)
                     land_tiles.append(point)
                     for tile in self.get_adjacent(point[0], point[1]): to_visit.append(tile)
-            type_of_water = len(land_tiles) < 30 and 'Island' or 'Continent'
-            print(f"\nNew {type_of_water}: {land_tiles=}")
-
-
+            self.areas['mountains'].append(Lake(land_tiles, self.name_generator.generate_name('mountains')))
 
     def show_map(self):
         plt.imshow(self.color_map)
         plt.show()
-        # manager = plt.get_current_fig_manager()
-        # manager.full_screen_toggle()
-        # plt.pause(.1)
-        # plt.close()
 
     def create_sources(self):
         num_sources = random.randint(round((self.x_dim * self.y_dim)**(1/3)/3), round((self.x_dim * self.y_dim)**(1/3)/2))
@@ -176,21 +195,19 @@ class MapGenerator:
                 x, y = point
 
             river_tiles = [(x,y) for x, y in river_tiles if type(self.world_map[x][y]) != LakeTile]
-            self.rivers.append(River(river_tiles, self.generate_random_name))
-            print(f"Created river from {source} to {river_tiles[-1]}")
+            self.areas['rivers'].append(River(river_tiles, self.name_generator.generate_name('rivers')))
+            
             for x, y in [(x,y) for x, y in river_tiles if type(self.world_map[x][y]) != LakeTile]:
                 self.world_map[x][y] = RiverTile(self.world_map[x][y]['height'])
-                self.color_map[x][y] = (0, 0, 255) # (0, 0, 255)
+                self.color_map[x][y] = (0, .25, 1) # (0, 0, 255)
 
     def create_lake(self, x, y, height):
-        print(f"Creating lake at {y}, {x}")
         max_size = random.randint(4,15)
         visited = []
         to_visit = [(x, y)]
         lake_tiles = []
         #self.show_map()
         while len(to_visit) > 0:
-            time.sleep(.25)
             # print(to_visit)
             # print(len(lake_tiles), len(set(lake_tiles)))
             # print(lake_tiles, '\n')
@@ -199,11 +216,11 @@ class MapGenerator:
             visited.append(point)
 
             if self.world_map[x][y]['height'] <= height and type(self.world_map[x][y]) not in (RiverTile, LakeTile, SeaTile):
-                print(f"Added lake tile {point=}")
+                #print(f"Added lake tile {point=}")
                 lake_tiles.append(point)
 
                 if len(lake_tiles) >= max_size:
-                    print(f"Max size of lake achieved: {max_size}")
+                    #print(f"Max size of lake achieved: {max_size}")
                     break
 
                 # warunek niesasiadowania z morzem
@@ -212,24 +229,17 @@ class MapGenerator:
                     if tile not in visited and tile not in to_visit:
                         to_visit.append(tile)
                         
-        print(f"Lake tiles: {lake_tiles}")
+        # print(f"Lake tiles: {lake_tiles}")
         for x, y in lake_tiles:
             self.world_map[x][y] = LakeTile(self.world_map[x][y]['height'])
-            self.color_map[x][y] = (0, 50, 225) # (0, 120, 255)
-        self.show_map()
+            self.color_map[x][y] = (0, .75, 1)
 
     def get_adjacent(self, x, y, condition = None):
-        # coords = [
-        #     (x-1, y),
-        #     (x+1, y),
-        #     (x, y-1),
-        #     (x, y+1)]
         if condition == None:
             condition = lambda point: self.__dist_from_edge(point[0], point[1], self.x_dim, self.y_dim, 'borders') > 0
         xx = yy = [-1,0,1]
         coords = [(x+dx, y+dy) for dy in yy for dx in xx]
         return list(filter(condition, coords))
-        #return [(c1, c2) for c1, c2 in coords if self.__dist_from_edge(c1, c2, self.x_dim, self.y_dim, 'borders') > 0]
 
     def get_lowest_adjacent(self, x, y):
         coords = self.get_adjacent(x, y)
@@ -251,15 +261,13 @@ class MapGenerator:
         plt.imshow([gradient,gradient,gradient])
         plt.show()
 
-my_generator = MapGenerator()
-my_generator.generate_map(100, 100, 'circle')
-print('     lakes:')
-for r in my_generator.lakes:
-    print(r.name)
-print('     seas:')
-for r in my_generator.seas:
-    print(r.name)
-print('     rivers:')
-for r in my_generator.rivers:
-    print(r.length, r.name)
-my_generator.show_map()
+
+if __name__ == '__main__':
+    my_generator = MapGenerator()
+    my_generator.generate_map(100, 100, 'circle')
+    for key in my_generator.areas.keys():
+        print(key)
+        for area in my_generator.areas[key]:
+            print(f"    {area.name}")
+
+    my_generator.show_map()
