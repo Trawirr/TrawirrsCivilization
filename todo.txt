@@ -1,0 +1,7 @@
+Basic resources of civilization:
+- food
+- production
+
+Civilization levels:
+- tribe
+- civilization
