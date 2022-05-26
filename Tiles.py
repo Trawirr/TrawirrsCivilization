@@ -13,8 +13,6 @@ class Tile:
     def __init__(self, height: float) -> None:
         # Assign values to self object
         self.__height = height
-        self.__area_type = ""
-        self.__area_name = ""
         self.__attributes = {}
 
         # Add tile to the Tile.all list
@@ -67,19 +65,30 @@ class Tile:
         coords = self.get_adjacent_tiles()
         h = Tile.all[self.x][self.y].height
         lowest_point = (self.x, self.y)
-        print(f"start {lowest_point} {Tile.all[lowest_point[0]][lowest_point[1]].height}")
+        #print(f"start {lowest_point} {Tile.all[lowest_point[0]][lowest_point[1]].height}")
         for c1, c2 in coords:
             if Tile.all[c1][c2] is WaterTile or Tile.all[c1][c2].height < 0:
+                print(f"{(c1,c2)} - water")
                 return False, (self.x, self.y)
             if Tile.all[c1][c2].height <= h:
-                print(f"{Tile.all[c1][c2].height} <= {h}")
+                #print(f"{Tile.all[c1][c2].height} <= {h}")
                 lowest_point = (c1, c2)
                 h = Tile.all[lowest_point[0]][lowest_point[1]].height
-        print(f"koniec {lowest_point} {Tile.all[lowest_point[0]][lowest_point[1]].height}\n")
+        #print(f"koniec {lowest_point} {Tile.all[lowest_point[0]][lowest_point[1]].height}\n")
         return True, lowest_point
+
+    def get_tile_description(self) -> str:
+        attributes_str = f"{self.__class__.__name__} {(self.x, self.y)}\nHeight: {int(self.meters)}m\n"
+        for key in self.__attributes:
+            attributes_str += f"{key}\n"
+            for val in self.__attributes[key]:
+                attributes_str += f"{val}\n"
+        return attributes_str
 
     @classmethod
     def generate_map(cls, mode='circle') -> None:
+        Tile.all = [[None for y in range(GRID_SIZE)] for x in range(GRID_SIZE)]
+        Tile.x, Tile.y = 0, 0
         noises = [PerlinNoise(octaves=n) for n in OCTAVES]
         for i in range(GRID_SIZE):
             for j in range(GRID_SIZE):
@@ -110,8 +119,12 @@ class Tile:
     @staticmethod
     def generate_color_map():
         start = time()
-        color_map = [list(map(lambda tile: tile.pick_color(), row)) for row in Tile.all]
-        color_map = np.array(color_map)
+        color_map = np.zeros((GRID_SIZE*TILE_SIZE, GRID_SIZE*TILE_SIZE, 3))
+        for x in range(GRID_SIZE):
+            for y in range(GRID_SIZE):
+                color_map[x*TILE_SIZE:x*TILE_SIZE+TILE_SIZE, y*TILE_SIZE:y*TILE_SIZE+TILE_SIZE] = Tile.all[x][y].pick_color()
+        # color_map = [list(map(lambda tile: tile.pick_color(), row)) for row in Tile.all]
+        # color_map = np.array(color_map)
         print(f"Generated color map in {time()-start}s")
         return color_map
 
@@ -143,7 +156,7 @@ class LandTile(Tile):
 class WaterTile(Tile):
     colors = WATER_COLORS
     def __init__(self, height: float) -> None:
-        super().__init__(height)
+        super().__init__(height/20)
 
 if __name__ == '__main__':
     Tile.generate_map()

@@ -1,5 +1,5 @@
 import random
-from tiles import *
+from Tiles import *
 
 class Area:
     names = NAMES['Area']
@@ -82,7 +82,7 @@ class Area:
         while len(sources) < LAKE_MAX_NUMBER:
             x_random, y_random = random.randint(0, GRID_SIZE-1), random.randint(0, GRID_SIZE-1)
             if  random.random() < Tile.all[x_random][y_random].height - .1 and \
-                list(filter(lambda xy: Tile.distance(x_random, y_random, xy[0], xy[1]) <= 2, sources)) == []:
+                list(filter(lambda xy: Tile.distance(x_random, y_random, xy[0], xy[1]) <= 4, sources)) == []:
                 sources.append((x_random, y_random))
         return sources
 
@@ -93,10 +93,14 @@ class Area:
             river_tiles = []
             x, y = source
             while True:
+                if Tile.all[x][y] is WaterTile:
+                    rivers.append(river_tiles)
+                    break
                 river_tiles.append((x, y))
                 lakeable, point = Tile.all[x][y].get_lowest_adjacent_tile()
 
                 if (x, y) == point:
+                    print(f"{lakeable=}")
                     lake_tiles = []
                     height = Tile.all[x][y].height
                     if height > 0 and lakeable:
@@ -104,12 +108,24 @@ class Area:
                         lake_tiles = Area.create_lake(x, y, height)
                         lakes.append(lake_tiles)
                     river_tiles = [tile for tile in river_tiles if tile not in lake_tiles]
-                    if river_tiles:
-                        rivers.append(river_tiles)
+                    river_tiles_fixed = []
+
+                    # This should be fixed/done better
+                    for x, y in river_tiles:
+                        if Tile.all[x][y] is WaterTile:
+                            break
+                        river_tiles_fixed.append((x,y))
+
+                    for x, y in river_tiles_fixed + lake_tiles:
+                        WaterTile.fix_tile(x, y)
+
+                    if river_tiles_fixed:
+                        rivers.append(river_tiles_fixed)
                     break
                 x, y = point
         return rivers, lakes
 
+    # Make new lake generating
     @classmethod
     def create_lake(cls, x, y, height):
         condition = lambda p: Tile.all[p[0]][p[1]] is WaterTile
@@ -137,6 +153,8 @@ class Area:
     def __repr__(self) -> str:
         return f"{self.__class__.__name__} ({self.name}, {len(self.tiles)} tiles)"
 
+
+# Source, ending?
 class River(Area):
     names = NAMES['River']
     def __init__(self, tiles) -> None:
@@ -163,6 +181,7 @@ class Island(Area):
     def __init__(self, tiles) -> None:
         super().__init__(tiles)
 
+# Peaks?
 class Mountain(Area):
     names = NAMES['Mountain']
     def __init__(self, tiles) -> None:
