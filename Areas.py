@@ -7,7 +7,7 @@ class Area:
     def __init__(self, tiles: list) -> None:
         self.__tiles = tiles
         self.__name = self.names.pop(0)
-        print(f"{self.__class__.__name__} {self.name} of size {len(self.tiles)} tiles")
+        print(f"Created: {self.__class__.__name__} {self.name} of size {len(self.tiles)} tiles")
         Area.all.append(self)
         for x, y in self.__tiles:
             Tile.all[x][y].add_attribute('area', f'{self.__class__.__name__}: {self.name}')
@@ -25,18 +25,12 @@ class Area:
 
     @classmethod
     def generate_areas(cls): # <-------------------
+        print("Generating areas...")
         water = Area.separate_areas(lambda x: x < 0)
         lands = Area.separate_areas(lambda x: x >= 0)
         mountains = Area.separate_areas(lambda x: x > 0.35)
-        rivers, lakes = Area.create_rivers(Area.create_sources())
-        print(f"{lakes=}")
-        for area in (water, lands, mountains, rivers, lakes):
-            print(len(area))
-        
-        # Need to change from LandTile to WaterTile
-        for area in rivers+lakes:
-            for x, y in area:
-                WaterTile.fix_tile(x, y)
+        lakes = Area.create_lakes()
+        rivers = Area.create_rivers(Area.create_sources())
 
         for area in water:
             if len(area) <= LAKE_MAX_SIZE:
@@ -79,75 +73,91 @@ class Area:
     @classmethod
     def create_sources(cls):
         sources = []
-        while len(sources) < LAKE_MAX_NUMBER:
+        while len(sources) < RIVER_MAX_NUMBER:
             x_random, y_random = random.randint(0, GRID_SIZE-1), random.randint(0, GRID_SIZE-1)
             if  random.random() < Tile.all[x_random][y_random].height - .1 and \
-                list(filter(lambda xy: Tile.distance(x_random, y_random, xy[0], xy[1]) <= 4, sources)) == []:
+                list(filter(lambda xy: Tile.distance(x_random, y_random, xy[0], xy[1]) <= 5, sources)) == []:
                 sources.append((x_random, y_random))
         return sources
 
     @classmethod
     def create_rivers(cls, sources):
-        rivers, lakes = [], []
+        rivers = []
         for source in sources:
             river_tiles = []
             x, y = source
             while True:
-                if Tile.all[x][y] is WaterTile:
-                    rivers.append(river_tiles)
+                print(x,y)
+                if isinstance(Tile.all[x][y], WaterTile):
                     break
                 river_tiles.append((x, y))
-                lakeable, point = Tile.all[x][y].get_lowest_adjacent_tile()
-
-                if (x, y) == point:
-                    print(f"{lakeable=}")
-                    lake_tiles = []
-                    height = Tile.all[x][y].height
-                    if height > 0 and lakeable:
-                        height += .01
-                        lake_tiles = Area.create_lake(x, y, height)
-                        lakes.append(lake_tiles)
-                    river_tiles = [tile for tile in river_tiles if tile not in lake_tiles]
-                    river_tiles_fixed = []
-
-                    # This should be fixed/done better
-                    for x, y in river_tiles:
-                        if Tile.all[x][y] is WaterTile:
-                            break
-                        river_tiles_fixed.append((x,y))
-
-                    for x, y in river_tiles_fixed + lake_tiles:
-                        WaterTile.fix_tile(x, y)
-
-                    if river_tiles_fixed:
-                        rivers.append(river_tiles_fixed)
+                sorted_adjacent_tiles = Tile.all[x][y].get_lowest_adjacent_tile()
+                for tile in sorted_adjacent_tiles:
+                    if tile not in river_tiles:
+                        point = tile
+                        break
+                if point == (x, y):
                     break
                 x, y = point
-        return rivers, lakes
+            for x, y in river_tiles:
+                WaterTile.fix_tile(x, y)
+            rivers.append(river_tiles)
+        return rivers
 
-    # Make new lake generating
     @classmethod
-    def create_lake(cls, x, y, height):
-        condition = lambda p: Tile.all[p[0]][p[1]] is WaterTile
-        max_size = random.randint(1, LAKE_MAX_SIZE)
+    def create_lakes(cls):
+        lakes = []
         visited = []
-        to_visit = [(x, y)]
-        lake_tiles = []
-
-        while len(to_visit) > 0:
-            point = to_visit.pop(0)
-            x, y = point
-            visited.append(point)
-            if Tile.all[x][y].height <= height:
-                lake_tiles.append(point)
-                if len(lake_tiles) >= max_size:
+        while len(lakes) < LAKE_MAX_NUMBER:
+            lake_tiles = []
+            lake_size = random.randint(3, LAKE_MAX_SIZE)
+            x, y = (random.randint(0, GRID_SIZE-1), random.randint(0, GRID_SIZE-1))
+            height_max = Tile.all[x][y].height
+            if random.random() > 1 - height_max:
+                continue
+            to_visit = [(x, y)]
+            while len(lake_tiles) < lake_size:
+                x, y = to_visit.pop(0)
+                
+                if isinstance(Tile.all[x][y], WaterTile) or Tile.all[x][y].is_adjacent_to(WaterTile):
                     break
 
-                adjacent = Tile.all[x][y].get_adjacent_tiles(lambda point: len(list(filter(condition, Tile.all[x][y].get_adjacent_tiles())))==0)
-                for tile in adjacent:
-                    if tile not in visited and tile not in to_visit:
+                if (x, y) not in visited and Tile.all[x][y].height <= height_max:
+                    lake_tiles.append((x, y))
+                    visited.append((x, y))
+
+                    adjacent_tiles = Tile.all[x][y].get_adjacent_tiles()
+                    for tile in adjacent_tiles:
                         to_visit.append(tile)
-        return lake_tiles
+                    
+            if lake_tiles:
+                lake_height = min([Tile.all[x][y].height for x, y in lake_tiles])
+                for x, y in lake_tiles:
+                    WaterTile.fix_tile(x, y, lake_height*2)
+                lakes.append(lake_tiles)
+        return lakes
+                
+
+        # condition = lambda p: Tile.all[p[0]][p[1]] is WaterTile
+        # max_size = random.randint(1, LAKE_MAX_SIZE)
+        # visited = []
+        # to_visit = [(x, y)]
+        # lake_tiles = []
+
+        # while len(to_visit) > 0:
+        #     point = to_visit.pop(0)
+        #     x, y = point
+        #     visited.append(point)
+        #     if Tile.all[x][y].height <= height:
+        #         lake_tiles.append(point)
+        #         if len(lake_tiles) >= max_size:
+        #             break
+
+        #         adjacent = Tile.all[x][y].get_adjacent_tiles(lambda point: len(list(filter(condition, Tile.all[x][y].get_adjacent_tiles())))==0)
+        #         for tile in adjacent:
+        #             if tile not in visited and tile not in to_visit:
+        #                 to_visit.append(tile)
+        # return lake_tiles
 
 
     def __repr__(self) -> str:

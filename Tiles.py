@@ -63,19 +63,24 @@ class Tile:
 
     def get_lowest_adjacent_tile(self):
         coords = self.get_adjacent_tiles()
-        h = Tile.all[self.x][self.y].height
-        lowest_point = (self.x, self.y)
-        #print(f"start {lowest_point} {Tile.all[lowest_point[0]][lowest_point[1]].height}")
-        for c1, c2 in coords:
-            if Tile.all[c1][c2] is WaterTile or Tile.all[c1][c2].height < 0:
-                print(f"{(c1,c2)} - water")
-                return False, (self.x, self.y)
-            if Tile.all[c1][c2].height <= h:
-                #print(f"{Tile.all[c1][c2].height} <= {h}")
-                lowest_point = (c1, c2)
-                h = Tile.all[lowest_point[0]][lowest_point[1]].height
-        #print(f"koniec {lowest_point} {Tile.all[lowest_point[0]][lowest_point[1]].height}\n")
-        return True, lowest_point
+        coords_sorted = sorted(coords, key=lambda xy: Tile.all[xy[0]][xy[1]].height)
+        return coords_sorted
+        # h = Tile.all[self.x][self.y].height
+        # h = 1.0
+        # lowest_point = (self.x, self.y)
+        
+        # for c1, c2 in coords:
+        #     if Tile.all[c1][c2].height <= h:
+        #         lowest_point = (c1, c2)
+        #         h = Tile.all[c1][c2].height
+        # return lowest_point
+
+    def is_adjacent_to(self, cls):
+        adjacent_tiles = self.get_adjacent_tiles()
+        for x, y in adjacent_tiles:
+            if isinstance(Tile.all[x][y], cls):
+                return True
+        return False
 
     def get_tile_description(self) -> str:
         attributes_str = f"{self.__class__.__name__} {(self.x, self.y)}\nHeight: {int(self.meters)}m\n"
@@ -105,10 +110,12 @@ class Tile:
         print(f"Generating done...\n\n")
 
     @classmethod
-    def fix_tile(cls, x, y):
+    def fix_tile(cls, x, y, height=None):
         tmp = (Tile.x, Tile.y)
         Tile.x, Tile.y = x, y
-        Tile.all[x][y] = cls(Tile.all[x][y].height)
+        if height is None:
+            height = Tile.all[x][y].height
+        Tile.all[x][y] = cls(height)
         Tile.x, Tile.y = tmp
 
     @staticmethod
@@ -156,7 +163,7 @@ class LandTile(Tile):
 class WaterTile(Tile):
     colors = WATER_COLORS
     def __init__(self, height: float) -> None:
-        super().__init__(height/20)
+        super().__init__(height/2)
 
 if __name__ == '__main__':
     Tile.generate_map()
