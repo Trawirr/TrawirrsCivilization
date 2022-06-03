@@ -1,6 +1,7 @@
 Basic resources of civilization:
 - food
 - production
+- military power
 
 Civilization levels:
 - tribe

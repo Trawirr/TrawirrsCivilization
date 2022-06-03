@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from perlin_noise import PerlinNoise
 from settings import *
 import numpy as np
-#from areas2 import Area
 
 class Tile:
     all = [[None for y in range(GRID_SIZE)] for x in range(GRID_SIZE)]
@@ -13,6 +12,7 @@ class Tile:
     def __init__(self, height: float) -> None:
         # Assign values to self object
         self.__height = height
+        self.__owner = "Unconquered"
         self.__attributes = {}
 
         # Add tile to the Tile.all list
@@ -27,6 +27,15 @@ class Tile:
     @property
     def meters(self):
         return self.__height*1e4
+
+    @property
+    def owner(self):
+        return self.__owner
+
+    @owner.setter
+    def owner(self, o):
+        print(f"Tile {(self.x, self.y)} is now owned by {o}")
+        self.__owner = o
 
     def add_attribute(self, key, value):
         if key in self.__attributes.keys():
@@ -83,7 +92,7 @@ class Tile:
         return False
 
     def get_tile_description(self) -> str:
-        attributes_str = f"{self.__class__.__name__} {(self.x, self.y)}\nHeight: {int(self.meters)}m\n"
+        attributes_str = f"{self.__class__.__name__} {(self.x, self.y)}\nHeight: {int(self.meters)}m\nOwner: {self.owner}\n"
         for key in self.__attributes:
             attributes_str += f"{key}\n"
             for val in self.__attributes[key]:
@@ -134,6 +143,14 @@ class Tile:
         # color_map = np.array(color_map)
         print(f"Generated color map in {time()-start}s")
         return color_map
+
+    @staticmethod
+    def generate_political_map(civs_tiles_and_colors):
+        political_map = Tile.generate_color_map()
+        for tiles, color in civs_tiles_and_colors:
+            for x, y in tiles:
+                political_map[x*TILE_SIZE:x*TILE_SIZE+TILE_SIZE, y*TILE_SIZE:y*TILE_SIZE+TILE_SIZE] = color
+        return political_map
 
     @staticmethod
     def distance(x1, y1, x2, y2):

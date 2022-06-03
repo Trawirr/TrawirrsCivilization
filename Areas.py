@@ -116,7 +116,7 @@ class Area:
             if random.random() > 1 - height_max:
                 continue
             to_visit = [(x, y)]
-            while len(lake_tiles) < lake_size:
+            while len(lake_tiles) < lake_size and to_visit:
                 x, y = to_visit.pop(0)
                 
                 if isinstance(Tile.all[x][y], WaterTile) or Tile.all[x][y].is_adjacent_to(WaterTile):
