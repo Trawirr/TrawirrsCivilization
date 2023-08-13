@@ -1,0 +1,22 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    </head>
+
+    <div class="sidenav">
+      <a hx-get="/map/map.png" hx-swap="innerHTML" hx-target=".main"><i class="fas fa-map"></i>Geo Map</a>
+      <a hx-get="/map/map_rgb.png" hx-swap="innerHTML" hx-target=".main"><i class="fas fa-map"></i>Political Map</a>
+    </div> 
+
+    <div class="main">
+    </div>
+
+      {% block scripts %}
+      <script src="{% static 'js/main.js' %}"></script> 
+      <script src="https://unpkg.com/htmx.org@1.9.4"></script>
+      {% endblock %}
+</html>
