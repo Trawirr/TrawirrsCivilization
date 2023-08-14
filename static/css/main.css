@@ -1,5 +1,7 @@
 body {
-  background-color: #babaaa;
+  background-image: url('../images/wood-texture2.jpg'); /* Set the path to your image */
+  background-size: auto; /* Scale the image to cover the entire div */
+  background-position: center;
 }
 
 i.fas,
@@ -144,11 +146,11 @@ i.fal {
 
 img {
   image-rendering: pixelated;
-  border: 20px solid #8b5e3c; /* Border color */
+  border: 20px solid #4F3A2A; /* Border color */
   border-radius: 15px; /* Rounded corners */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Shadow effect */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6); /* Shadow effect */
   padding: 10px; /* Padding inside the frame */
-  background-color: #e5d1ab; /* Background color inside the frame */
+  background-color: #d4bb8b; /* Background color inside the frame */
   display: inline-block;
 }
 
@@ -162,6 +164,7 @@ img {
 .form-container {
   flex: 1;
   margin-right: 20px;
+  color: wheat;
 }
 
 .image-container {
