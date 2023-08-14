@@ -34,3 +34,12 @@ def generate_map(request):
                  )
     context = {}
     return map_view(request, map_name+"_geo.png")
+
+def get_tooltip(request):
+    print(request.GET['x'], request.GET['y'])
+    x = request.GET.get('x', 0)
+    y = request.GET.get('y', 0)
+
+    tooltip_content = f'({x}, {y})\n'
+
+    return HttpResponse(tooltip_content)
