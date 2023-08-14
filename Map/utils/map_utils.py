@@ -1,36 +1,49 @@
+import string
+import random
+
 HEIGHTS_WATER = [
-    -1.0,
-    -0.5,
-    0.0,
+    0.05,
+    0.2,
+    0.7,
+    0.95,
     1.0
 ]
 
 COLORS_WATER = [
-    (0, 0, 0),
-    (0, 0, 255),
-    (0, 100, 255),
-    (0, 255, 255)
+    (0, 0, 50),
+    (25, 100, 140),
+    (35, 145, 200),
+    (45, 185, 255),
+    (45, 200, 255)
 ]
 
 HEIGHTS_LAND = [
-    -1.0,
-    0.0,
-    0.3,
-    0.6,
-    0.9,
+    0.1,
+    0.25,
+    0.5,
+    0.7,
+    0.8,
     1.0
 ]
 
 COLORS_LAND = [
-    (50, 200, 50),
-    (0, 153, 0),
-    (153, 255, 51),
-    (180, 180, 0),
-    (110, 20, 0),
-    (50, 0, 0)
+    (114, 193, 134),
+    (162, 215, 164),
+    (225, 227, 158),
+
+    (241, 121, 82),
+    (221, 85, 80),
+    (130, 23, 45)
 ]
 
+def generate_random_string(length=10):
+    characters = string.ascii_letters + string.digits
+    random_chars = [random.choice(characters) for _ in range(length)]
+    filename = "".join(random_chars)
+    return filename
+
 def map_value(value, min1, max1, min2, max2):
+    value = min(value, max1)
     span1 = max1 - min1
     span2 = max2 - min2
 
@@ -38,20 +51,21 @@ def map_value(value, min1, max1, min2, max2):
 
     return min2 + (value_scaled * span2)
 
-def get_color_rules(height, tile_type="land"):
+def distance(x1, y1, x2, y2):
+    return ((x2-x1)**2 + (y2-y1)**2)**0.5
+
+def get_color(height, tile_type="land"):
     if tile_type == "land":
         heights, colors = HEIGHTS_LAND, COLORS_LAND
     elif tile_type == "water":
         heights, colors = HEIGHTS_WATER, COLORS_WATER
 
     for i, h in enumerate(heights):
-        if h > height:
-            height_ratio = (height - heights[i-1]) / (heights[i] - heights[i-1])
-            return height_ratio, colors[i-1], colors[i]
+        if h >= height:
+            return colors[i]
         
 def get_color_from_range(height_ratio, color1, color2, height_min=0.0, height_max=1.0):
     return tuple(int(map_value(color1[i] + (color2[i] - color1[i]) * height_ratio, height_min, height_max, 0, 1)) for i in range(3))
 
 def get_tile_color(height, height_min, height_max, tile_type="land"):
-    height_ratio, color1, color2 = get_color_rules(height, tile_type)
-    return get_color_from_range(height_ratio, color1, color2, height_min, height_max)
+    return get_color(map_value(height, height_min, height_max, 0, 1), tile_type)

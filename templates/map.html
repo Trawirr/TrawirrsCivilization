@@ -1,3 +1,5 @@
 {% load static %}
 
-<img src="{% static 'images/' %}{{ map_name }}" width="50%" height="50%" style="margin-left: 25%">
+<img src="{% static 'images/' %}{{ map_name }}" hx-get="/map/{{ map_name_changed }}" hx-trigger="click" hx-swap="outerHTML" hx-target="this" width="50%" height="50%" style="margin-left: 25%">
+
+<script src="https://unpkg.com/htmx.org@1.9.4"></script>
