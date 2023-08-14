@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand, CommandError
 from perlin_noise import PerlinNoise
 from PIL import Image
-
-from Map.utils.map_utils import get_tile_color, map_value, distance
 import random
+import json
+from Map.utils.map_utils import get_tile_color, map_value, distance
 
 class Command(BaseCommand):
     help = 'Creates a new map with new Tiles, Areas and Civilizations'
@@ -13,6 +13,7 @@ class Command(BaseCommand):
         parser.add_argument('-o', '--octaves', type=str, default="3 6 12 24", help='List of octaves')
         parser.add_argument('-sl', '--sealevel', type=float, default=0.7, help='Sea level/procentage')
         parser.add_argument('-b', '--border', type=int, default=5, help='Border width')
+        parser.add_argument('-sd', '--seed', type=int, default=random.randint(1, 100000), help='Map seed')
         parser.add_argument('-n', '--name', type=str, default="map", help='Map file name')
 
     def handle(self, *args, **options):
@@ -20,11 +21,12 @@ class Command(BaseCommand):
         octaves = options['octaves']
         sea_level_arg = options['sealevel']
         border = options['border']
+        seed = options['seed']
         name = options['name']
         print("Creating a map...", size, octaves)
 
         octaves = [int(o) for o in octaves.split()]
-        noises = [PerlinNoise(octaves=o) for o in octaves]
+        noises = [PerlinNoise(octaves=o, seed=seed) for o in octaves]
         limit = 0.5 * (1 - 0.5**len(octaves)) / 0.5
         sea_level = map_value(sea_level_arg, 0, 1, -limit, limit)
         heights_max = [0 for o in octaves]
@@ -40,11 +42,10 @@ class Command(BaseCommand):
                 for i, noise in enumerate(noises):
                     height += noise([x/100, y/100]) * .5**i
 
-                distance_from_edge = distance(x, y, size//2, size//2) - size//2 + border
-                if distance_from_edge > 0:
-                    height -= map_value(distance_from_edge, 0, border, 0, limit)
-                    #print(distance_from_edge, distance_from_edge/distance(0, 0, size//2, size//2))
-                    #height -= distance_from_edge/(distance(0, 0, size//2, size//2) - border)
+                if border > 0:
+                    distance_from_edge = distance(x, y, size//2, size//2) - size//2 + border
+                    if distance_from_edge > 0:
+                        height -= map_value(distance_from_edge, 0, border, 0, limit)
             
                 height_fixed = int((height + 1) * 127.5)
                 image.putpixel((x, y), height_fixed)
@@ -65,4 +66,15 @@ class Command(BaseCommand):
 
         image_rgb.save(f"static/images/{name}_geo.png")
         image_political.save(f"static/images/{name}_political.png")
+
+        map_info = {
+            "size": size,
+            "octaves": octaves,
+            "sea_level": sea_level,
+            "border": border,
+            "seed": seed,
+        }
+
+        with open(f"static/map_jsons/{name}.json", 'w') as f:
+            json.dump(map_info, f, indent=4)
                 

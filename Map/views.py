@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.core.management import call_command
 from .utils.map_utils import generate_random_string
+from .utils.map_json_utils import get_map_field
 
 def main_view(request):
     context = {}
@@ -12,7 +13,8 @@ def map_view(request, map_name):
     map_name_changed = map_name.replace("geo", "political") if "geo" in map_name else map_name.replace("political", "geo")
     context = {
         "map_name": map_name,
-        "map_name_changed": map_name_changed
+        "map_name_changed": map_name_changed,
+        "map_size": get_map_field(map_name, "size")
         }
     return render(request, 'map.html', context)
 

@@ -1,5 +1,18 @@
 {% load static %}
 
-<img src="{% static 'images/' %}{{ map_name }}" hx-get="/map/{{ map_name_changed }}" hx-trigger="click" hx-swap="outerHTML" hx-target="this" width="50%" height="50%" style="margin-left: 25%">
+<div class="map-container" style="margin-left: 25%; width: 50%">
+    <img id="pixel-map" src="{% static 'images/' %}{{ map_name }}" hx-get="/map/{{ map_name_changed }}" hx-trigger="click" hx-swap="outerHTML" hx-target=".map-container">
+</div>
 
-<script src="https://unpkg.com/htmx.org@1.9.4"></script>
+<script>
+var image = document.querySelector('#pixel-map');
+var pixelWidth = image.width / {{ map_size }};
+var pixelHeight = image.height / {{ map_size }};
+
+image.addEventListener('mousemove', (event) => {
+  const x = Math.ceil(event.offsetX / pixelWidth);
+  const y = Math.ceil(event.offsetY / pixelHeight);
+
+  console.log(x, y);
+});
+</script>
