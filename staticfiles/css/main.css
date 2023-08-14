@@ -144,4 +144,34 @@ i.fal {
 
 img {
   image-rendering: pixelated;
+  border: 20px solid #8b5e3c; /* Border color */
+  border-radius: 15px; /* Rounded corners */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Shadow effect */
+  padding: 10px; /* Padding inside the frame */
+  background-color: #e5d1ab; /* Background color inside the frame */
+  display: inline-block;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+.form-container {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.image-container {
+  flex: 3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-container img {
+  max-width: 100%;
+  max-height: 100%;
 }
