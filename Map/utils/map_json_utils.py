@@ -37,3 +37,16 @@ def get_lowest_adjacent(map_name, x, y, used_coords=[]):
             coords_min = (xx, yy)
 
     return coords_min
+
+def get_reservoir(map_name, x, y):
+    map_name = map_name.replace("_geo", "").replace("_political", "").replace(".png", "")
+    with open(f"static/map_jsons/{map_name}.json") as f:
+        data = json.load(f)
+    coords = [x, y]
+    for lake in data['lakes']:
+        if coords in lake['tiles']:
+            return "Lake " + lake['name']
+    for river in data['rivers']:
+        if coords in river['tiles']:
+            return "River " + lake['name']
+    return None

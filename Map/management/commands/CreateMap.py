@@ -1,9 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
-from perlin_noise import PerlinNoise
 from PIL import Image
 import random
 import json
-from Map.utils.map_utils import get_tile_color, map_value, distance
+from Map.utils.map_utils import get_tile_color, map_value, distance, get_height
 
 class Command(BaseCommand):
     help = 'Creates a new map with new Tiles, Areas and Civilizations'
@@ -11,8 +10,8 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('-s', '--size', type=int, default=128, help='Size of a map')
         parser.add_argument('-o', '--octaves', type=str, default="3 6 12 24", help='List of octaves')
-        parser.add_argument('-sl', '--sealevel', type=float, default=0.7, help='Sea level/procentage')
-        parser.add_argument('-b', '--border', type=int, default=5, help='Border width')
+        parser.add_argument('-sl', '--sealevel', type=float, default=0.5, help='Sea level/procentage')
+        parser.add_argument('-b', '--border', type=int, default=20, help='Border width')
         parser.add_argument('-sd', '--seed', type=int, default=random.randint(1, 100000), help='Map seed')
         parser.add_argument('-n', '--name', type=str, default="map", help='Map file name')
 
@@ -26,7 +25,6 @@ class Command(BaseCommand):
         print("Creating a map...", size, octaves)
 
         octaves = [int(o) for o in octaves.split()]
-        noises = [PerlinNoise(octaves=o, seed=seed) for o in octaves]
         limit = 0.5 * (1 - 0.5**len(octaves)) / 0.5
         sea_level = map_value(sea_level_arg, 0, 1, -limit, limit)
         heights_max = [0 for o in octaves]
@@ -35,19 +33,14 @@ class Command(BaseCommand):
         image = Image.new("L", (size, size))
         image_rgb = Image.new("RGB", (size, size))
         image_political = Image.new("RGB", (size, size))
-        height_min, height_max = 1, 0
+        height_max, height_max2 = 0, 0
         for x in range(size):
             for y in range(size):
-                height = 0
-                for i, noise in enumerate(noises):
-                    height += noise([x/100, y/100]) * .5**i
-
-                if border > 0:
-                    distance_from_edge = distance(x, y, size//2, size//2) - size//2 + border
-                    if distance_from_edge > 0:
-                        height -= map_value(distance_from_edge, 0, border, 0, limit)
+                height = get_height(x, y, octaves, seed, size, border)
             
                 height_fixed = int((height + 1) * 127.5)
+                height_max = max(height_fixed, height_max)
+                height_max2 = max(height, height_max2)
                 image.putpixel((x, y), height_fixed)
 
                 if height <= sea_level:
@@ -64,6 +57,9 @@ class Command(BaseCommand):
                 image_rgb.putpixel((x, y), get_tile_color(height, bottom, top, tile_type))
                 image_political.putpixel((x, y), political_color)
 
+        print("height gray max:", height_max, height_max2)
+
+        image.save(f"static/images/{name}_gray.png")
         image_rgb.save(f"static/images/{name}_geo.png")
         image_political.save(f"static/images/{name}_political.png")
 
@@ -73,6 +69,7 @@ class Command(BaseCommand):
             "sea_level": sea_level,
             "border": border,
             "seed": seed,
+            "height_limit": limit,
         }
 
         with open(f"static/map_jsons/{name}.json", 'w') as f:

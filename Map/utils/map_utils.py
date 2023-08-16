@@ -14,8 +14,8 @@ COLORS_WATER = [
     (0, 0, 50),
     (25, 100, 140),
     (35, 145, 200),
-    (45, 185, 255),
-    (45, 200, 255)
+    (45, 175, 255),
+    (45, 190, 255)
 ]
 
 HEIGHTS_LAND = [
@@ -32,13 +32,13 @@ COLORS_LAND = [
     (162, 215, 164),
     (225, 227, 158),
 
-    (241, 121, 82),
+    (241, 151, 82),
     (221, 85, 80),
     (130, 23, 45)
 ]
 
 def generate_random_string(length=10):
-    characters = string.ascii_letters + string.digits
+    characters = string.ascii_letters
     random_chars = [random.choice(characters) for _ in range(length)]
     filename = "".join(random_chars)
     return filename
