@@ -3,7 +3,7 @@ from PIL import Image
 import random
 import json
 #from Map.utils.map_utils import get_tile_color, map_value, distance, get_height
-from Map.utils.map_json_utils import get_map_height, get_map_field, get_lowest_adjacent
+from Map.utils.map_json_utils import get_mapped_height, get_map_field, get_lowest_adjacent
 from Map.utils.map_utils import COLORS_WATER, generate_random_string
 
 class Command(BaseCommand):
@@ -30,11 +30,11 @@ class Command(BaseCommand):
             # Searching for source coords
             while True:
                 x, y = random.randint(0, size-1), random.randint(0, size-1)
-                if random.random() < get_map_height(map_name, x, y)/5000:
+                if random.random() < get_mapped_height(map_name, x, y)/5000:
                     break
                 
             # Generating river
-            while get_map_height(map_name, x, y) > 0 and not check_rivers((x, y), rivers):
+            while get_mapped_height(map_name, x, y) > 0 and not check_rivers((x, y), rivers):
                 river_coords.append((x, y))
                 x, y = get_lowest_adjacent(map_name, x, y, river_coords)
                 river_map.putpixel((x, y), river_color)

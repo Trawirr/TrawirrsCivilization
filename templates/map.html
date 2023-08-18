@@ -31,11 +31,12 @@ image.addEventListener('mousemove', (event) => {
   const x = Math.ceil(event.offsetX / pixelWidth);
   const y = Math.ceil(event.offsetY / pixelHeight);
 
-  tooltip.style.left = event.offsetX + imageRect.left + 'px';
-  tooltip.style.top = event.offsetY + imageRect.top + window.scrollY + 'px';
+  tooltip.style.left = event.offsetX + imageRect.left + 20 + 'px';
+  tooltip.style.top = event.offsetY + imageRect.top + window.scrollY - 30 + 'px';
   tooltip.style.display = 'block';
+  //tooltip.textContent  = "";
 
-  map.setAttribute('hx-get', `/get_tooltip?x=${x}&y=${y}`);
+  map.setAttribute('hx-get', `/get_tooltip?x=${x}&y=${y}&map_name={{ map_name }}`);
   htmx.process(map);
 
   console.log(x, y);

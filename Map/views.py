@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.core.management import call_command
 from .utils.map_utils import generate_random_string, map_value
-from .utils.map_json_utils import get_map_field, get_map_height, get_reservoir
+from .utils.map_json_utils import get_map_field, get_mapped_height, get_area
 from .utils.map_image_utils import get_pixel_color
 
 def main_view(request):
@@ -37,15 +37,14 @@ def generate_map(request):
     return map_view(request, map_name+"_geo.png")
 
 def get_tooltip(request):
-    print(request.GET['x'], request.GET['y'])
     map_name = request.GET.get('map_name', 'map')
     x = int(request.GET.get('x', 1)) - 1
     y = int(request.GET.get('y', 1)) - 1
 
-    height = get_map_height(map_name, x, y)
+    height = get_mapped_height(map_name, x, y)
     tooltip_content = f'({x}, {y})<br>Height: {height:.2f}m'
 
-    reservoir = get_reservoir(map_name, x, y)
+    reservoir = get_area(map_name, x, y)
     if reservoir:
         tooltip_content += f"<br>{reservoir}"
 

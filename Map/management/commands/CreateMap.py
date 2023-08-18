@@ -70,6 +70,12 @@ class Command(BaseCommand):
             "border": border,
             "seed": seed,
             "height_limit": limit,
+            "seas": [],
+            "lakes": [],
+            "rivers": [],
+            "continents": [],
+            "islands": [],
+            "mountains": [],
         }
 
         with open(f"static/map_jsons/{name}.json", 'w') as f:
