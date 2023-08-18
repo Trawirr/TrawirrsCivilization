@@ -4,6 +4,7 @@ import random
 import json
 import time
 from Map.utils.map_json_utils import get_map_field, get_mapped_height, MapHandler
+from Map.utils.map_utils import generate_random_string
 
 class Command(BaseCommand):
     help = 'Creates land and water areas on <mapname> map'
@@ -13,7 +14,6 @@ class Command(BaseCommand):
         parser.add_argument('-mt', '--mountain', type=int, default=3000, help='Mountain height treshold')
 
     def handle(self, *args, **options):
-        start = time.time()
         map_name = options['mapname']
         map_handler = MapHandler(map_name)
         map_handler.load_map_info()
@@ -33,12 +33,27 @@ class Command(BaseCommand):
                     if h > 3000:
                         mountain_tiles.append((x, y))
 
-def get_adjacent_tiles(x, y, adjacency_type="normal"):
+        for reservoir in split_areas(water_tiles):
+            area_type = "seas" if len(reservoir) > 400 else "lakes"
+            map_handler.add_map_field(area_type, {"name": generate_random_string(), "tiles": sort_tiles(reservoir)})
+
+        for land in split_areas(land_tiles):
+            area_type = "continents" if len(land) > 500 else "islands"
+            map_handler.add_map_field(area_type, {"name": generate_random_string(), "tiles": sort_tiles(land)})
+
+        for mountain in split_areas(mountain_tiles):
+            map_handler.add_map_field("mountains", {"name": generate_random_string(), "tiles": sort_tiles(mountain)})
+
+def get_adjacent_tiles(coords, adjacency_type="normal"):
+    x, y = coords
     if adjacency_type == "normal":
         adjacent_coords = [(x + xx, y + yy) for xx in [-1, 0, 1] for yy in [-1, 0, 1] if not (xx == 0 and yy == 0)]
     elif adjacency_type == "cardinal":
         adjacent_coords = [(x + xx, y + yy) for xx in [-1, 0, 1] for yy in [-1, 0, 1] if not (xx == 0 and yy == 0) and (xx == 0 or yy == 0)]
     return adjacent_coords
+
+def sort_tiles(all_tiles):
+    return sorted(sorted(all_tiles, key = lambda xy: xy[1]), key = lambda xy: xy[0]) 
 
 def split_areas(all_tiles):
     areas = []
@@ -50,7 +65,7 @@ def split_areas(all_tiles):
             if tile in all_tiles:
                 all_tiles.remove(tile)
                 area_tiles.append(tile)
-                adjacent_tiles = get_adjacent_tiles()
+                adjacent_tiles = get_adjacent_tiles(tile)
                 for tile in adjacent_tiles:
                     to_visit.append(tile)
         areas.append(area_tiles)
