@@ -3,7 +3,7 @@ from PIL import Image
 import random
 import json
 #from Map.utils.map_utils import get_tile_color, map_value, distance, get_height
-from Map.utils.map_json_utils import get_mapped_height, get_map_field, get_lowest_adjacent
+from Map.utils.map_json_utils import get_mapped_height, get_map_field, get_lowest_adjacent, sort_tiles, MapHandler
 from Map.utils.map_utils import COLORS_WATER, generate_random_string
 
 class Command(BaseCommand):
@@ -15,8 +15,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         map_name = options['mapname']
+        map_handler = MapHandler(map_name)
         number_of_rivers = options['number']
-        size = get_map_field(map_name, "size")
+        size = map_handler.get_map_field("size")
         river_map = Image.new("RGBA", (size, size), (0, 0, 0, 0))
         river_color = COLORS_WATER[-1]
         lake_color = COLORS_WATER[-2]
@@ -70,18 +71,24 @@ class Command(BaseCommand):
         overlayed_map = Image.alpha_composite(original_map, river_map)
         overlayed_map.save(f"static/images/{map_name}_rivers.png")
 
-        reservoirs_info = {
-            "rivers": [{"name": generate_random_string(), "tiles": river} for river in rivers],
-            "lakes": [{"name": generate_random_string(), "tiles": lake} for lake in lakes]
-        }
+        for river in rivers:
+            map_handler.add_map_field("rivers", {"name": generate_random_string(), "tiles": sort_tiles(river)})
 
-        with open(f"static/map_jsons/{map_name}.json", 'r') as file:
-            map_info = json.load(file)
+        for lake in lakes:
+            map_handler.add_map_field("lakes", {"name": generate_random_string(), "tiles": sort_tiles(lake)})
 
-        new_map_info = {**map_info, **reservoirs_info}
+        # reservoirs_info = {
+        #     "rivers": [} for river in rivers],
+        #     "lakes": [{"name": generate_random_string(), "tiles": sort_tiles(lake)} for lake in lakes]
+        # }
 
-        with open(f"static/map_jsons/{map_name}.json", 'w') as f:
-            json.dump(new_map_info, f, indent=4)
+        # with open(f"static/map_jsons/{map_name}.json", 'r') as file:
+        #     map_info = json.load(file)
+
+        # new_map_info = {**map_info, **reservoirs_info}
+
+        # with open(f"static/map_jsons/{map_name}.json", 'w') as f:
+        #     json.dump(new_map_info, f, indent=4)
 
 def check_rivers(coords, rivers):
     for river in rivers:

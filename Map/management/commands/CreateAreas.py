@@ -3,7 +3,7 @@ from PIL import Image
 import random
 import json
 import time
-from Map.utils.map_json_utils import get_map_field, get_mapped_height, MapHandler
+from Map.utils.map_json_utils import get_map_field, get_mapped_height, sort_tiles, MapHandler
 from Map.utils.map_utils import generate_random_string
 
 class Command(BaseCommand):
@@ -51,9 +51,6 @@ def get_adjacent_tiles(coords, adjacency_type="normal"):
     elif adjacency_type == "cardinal":
         adjacent_coords = [(x + xx, y + yy) for xx in [-1, 0, 1] for yy in [-1, 0, 1] if not (xx == 0 and yy == 0) and (xx == 0 or yy == 0)]
     return adjacent_coords
-
-def sort_tiles(all_tiles):
-    return sorted(sorted(all_tiles, key = lambda xy: xy[1]), key = lambda xy: xy[0]) 
 
 def split_areas(all_tiles):
     areas = []

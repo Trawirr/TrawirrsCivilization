@@ -47,7 +47,7 @@ class MapHandler:
 
 
 def get_map_field(map_name, field_name):
-    map_name = map_name.replace("_geo", "").replace("_political", "").replace(".png", "")
+    map_name = map_name.replace("_geo", "").replace("_political", "").replace("_rivers", "").replace(".png", "")
     with open(f"static/map_jsons/{map_name}.json") as f:
         data = json.load(f)
         return data[field_name]
@@ -89,12 +89,16 @@ def get_lowest_adjacent(map_name, x, y, used_coords=[]):
 def is_coast(map_name, x, y):
     pass
 
+def sort_tiles(all_tiles):
+    return sorted(sorted(all_tiles, key = lambda xy: xy[1]), key = lambda xy: xy[0]) 
+
 def find_binary(tile, all_tiles):
     x, y = tile
     left, right = 0, len(all_tiles) - 1
     index = len(all_tiles) // 2
     while left <= right:  # Changed the condition to <=
         index = (left + right) // 2  # Calculate index inside the loop
+        #print(left, index, right)
         x_index, y_index = all_tiles[index]
         if x < x_index:
             right = index - 1  # Adjusted the right boundary
@@ -105,22 +109,30 @@ def find_binary(tile, all_tiles):
         elif y > y_index:
             left = index + 1  # Adjusted the left boundary
         else:
+            print("binary: True")
             return True
+    print("binary: False")
     return False
 
 def get_area(map_name, x, y):
-    map_name = map_name.replace("_geo", "").replace("_political", "").replace(".png", "")
+    map_name = map_name.replace("_geo", "").replace("_political", "").replace("_rivers", "").replace(".png", "")
     with open(f"static/map_jsons/{map_name}.json") as f:
         data = json.load(f)
 
-    coords = [x, y]
+    coords = (x, y)
     h = get_mapped_height(map_name, x, y)
     area_types = WATER_TYPES if h < 0 else LAND_TYPES
 
     start = time.time()
     for area_type in area_types:
+        print("\n", area_type)
         for area in data[area_type]:
+            print(area_type, area['name'])
+#            print(area_type, area['name'])
+            if coords in area['tiles'] != find_binary(coords, area['tiles']):
+                print(coords in area['tiles'], find_binary(coords, area['tiles']))
             if find_binary(coords, area['tiles']):
+                print("-- Found --")
                 return f"{area_type[0].upper() + area_type[1:-1]} {area['name']}"
     print(f"{time.time() - start}s")
     return None
