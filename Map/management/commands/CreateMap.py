@@ -97,6 +97,6 @@ class Command(BaseCommand):
             json.dump(map_info, f, indent=4)
                 
         call_command("CreateReservoirs", number=riversnumber)
-        #call_command("CreateBiomes")
+        call_command("CreateBiomes")
         call_command("CreateShadowMap", depth=depth)
         call_command("CreateAreas", mountain=mountain)

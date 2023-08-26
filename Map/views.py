@@ -10,8 +10,13 @@ def main_view(request):
     return render(request, 'base.html', context)
 
 def map_view(request, map_name):
-    print(map_name)
-    map_name_changed = map_name.replace("geo", "political") if "geo" in map_name else map_name.replace("political", "geo")
+    if "geo" in map_name:
+        map_name_changed = map_name.replace("geo", "political")
+    elif "political" in map_name:
+        map_name_changed = map_name.replace("political", "biomes")
+    elif "biomes" in map_name:
+        map_name_changed = map_name.replace("biomes", "geo")
+
     context = {
         "map_name": map_name,
         "map_name_changed": map_name_changed,

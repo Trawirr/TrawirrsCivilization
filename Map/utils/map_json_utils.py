@@ -11,7 +11,7 @@ class MapHandler:
         self.map_name = map_name
 
     def get_map_field(self, field_name):
-        map_name = self.map_name.replace("_geo", "").replace("_political", "").replace(".png", "")
+        map_name = self.map_name[:self.map_name.rfind("_")]
         with open(f"static/map_jsons/{map_name}.json") as f:
             data = json.load(f)
             return data[field_name]
@@ -47,7 +47,7 @@ class MapHandler:
 
 
 def get_map_field(map_name, field_name):
-    map_name = map_name.replace("_geo", "").replace("_political", "").replace("_rivers", "").replace(".png", "")
+    map_name = map_name[:map_name.rfind("_")]
     with open(f"static/map_jsons/{map_name}.json") as f:
         data = json.load(f)
         return data[field_name]
@@ -115,7 +115,7 @@ def find_binary(tile, all_tiles):
     return False
 
 def get_area(map_name, x, y):
-    map_name = map_name.replace("_geo", "").replace("_political", "").replace("_rivers", "").replace(".png", "")
+    map_name = map_name[:map_name.rfind("_")]
     with open(f"static/map_jsons/{map_name}.json") as f:
         data = json.load(f)
 
