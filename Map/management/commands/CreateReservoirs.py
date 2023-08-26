@@ -17,6 +17,7 @@ class Command(BaseCommand):
         map_name = options['mapname']
         map_handler = MapHandler(map_name)
         number_of_rivers = options['number']
+        print(f"Creating reservoirs: map_name = {map_name}, number of rivers = {number_of_rivers}")
         size = map_handler.get_map_field("size")
         river_map = Image.new("RGBA", (size, size), (0, 0, 0, 0))
         river_color = COLORS_WATER[-1]
@@ -67,9 +68,24 @@ class Command(BaseCommand):
                 lakes.append(lake_coords)
                 lake_coords = []
 
+        import time
+        start = time.time()
+        for lake in lakes:
+            for lake_coords in lake:
+                for river in rivers:
+                    if lake_coords in river:
+                        print(lake_coords)
+                        river.remove(lake_coords)
+        print(f"Deleting lakes from rivers: {time.time() - start}s")
+
+
         original_map = Image.open(f"static/images/{map_name}_geo.png").convert("RGBA")
         overlayed_map = Image.alpha_composite(original_map, river_map)
         overlayed_map.save(f"static/images/{map_name}_geo.png")
+
+        original_map = Image.open(f"static/images/{map_name}_political.png").convert("RGBA")
+        overlayed_map = Image.alpha_composite(original_map, river_map)
+        overlayed_map.save(f"static/images/{map_name}_political.png")
 
         for river in rivers:
             map_handler.add_map_field("rivers", {"name": generate_random_string(), "tiles": sort_tiles(river)})

@@ -30,19 +30,14 @@ class Command(BaseCommand):
                     if h < h2:
                         if use_depth:
                             shadow_color = (0, 0, 0, int(map_value(h2 - h, 0, .5, 10, 200)))
-                            print(shadow_color)
                         shadow_map.putpixel((x, y), shadow_color)
                     
         shadow_map.save(f"static/images/{map_name}_shadow.png")
 
         original_map = Image.open(f"static/images/{map_name}_geo.png").convert("RGBA")
         overlayed_map = Image.alpha_composite(original_map, shadow_map)
-        overlayed_map.save(f"static/images/{map_name}_geo_shadow.png")
-
-        original_map = Image.open(f"static/images/{map_name}_rivers.png").convert("RGBA")
-        overlayed_map = Image.alpha_composite(original_map, shadow_map)
-        overlayed_map.save(f"static/images/{map_name}_rivers_shadow.png")
+        overlayed_map.save(f"static/images/{map_name}_geo.png")
 
         original_map = Image.open(f"static/images/{map_name}_political.png").convert("RGBA")
         overlayed_map = Image.alpha_composite(original_map, shadow_map)
-        overlayed_map.save(f"static/images/{map_name}_political_shadow.png")
+        overlayed_map.save(f"static/images/{map_name}_political.png")

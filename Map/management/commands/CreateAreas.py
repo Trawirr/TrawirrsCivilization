@@ -15,6 +15,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         map_name = options['mapname']
+        mountain = options['mountain']
+        print(f"Creating reservoirs: map_name = {map_name}, mountain treshold = {mountain}")
         map_handler = MapHandler(map_name)
         map_handler.load_map_info()
         # split tiles
@@ -30,7 +32,7 @@ class Command(BaseCommand):
                     water_tiles.append((x, y))
                 else:
                     land_tiles.append((x, y))
-                    if h > 3000:
+                    if h > mountain:
                         mountain_tiles.append((x, y))
 
         for reservoir in split_areas(water_tiles):
