@@ -16,7 +16,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         map_name = options['mapname']
         mountain = options['mountain']
-        print(f"Creating reservoirs: map_name = {map_name}, mountain treshold = {mountain}")
+        print(f"Creating areas: map_name = {map_name}, mountain treshold = {mountain}")
         map_handler = MapHandler(map_name)
         map_handler.load_map_info()
         # split tiles

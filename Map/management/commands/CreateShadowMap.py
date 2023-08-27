@@ -42,6 +42,6 @@ class Command(BaseCommand):
         overlayed_map = Image.alpha_composite(original_map, shadow_map)
         overlayed_map.save(f"static/images/{map_name}_biomes.png")
 
-        original_map = Image.open(f"static/images/{map_name}_biomes.png").convert("RGBA")
+        original_map = Image.open(f"static/images/{map_name}_political.png").convert("RGBA")
         overlayed_map = Image.alpha_composite(original_map, shadow_map)
-        overlayed_map.save(f"static/images/{map_name}_biomes.png")
+        overlayed_map.save(f"static/images/{map_name}_political.png")

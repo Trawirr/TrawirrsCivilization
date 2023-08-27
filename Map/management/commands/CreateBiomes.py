@@ -20,13 +20,13 @@ class Command(BaseCommand):
         biome_handler.load_map_info()
         biome_handler.load_biome_info()
         size = biome_handler.get_map_field("size")
-        image_rgb = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        biome_map = Image.new("RGBA", (size, size), (0, 0, 0, 0))
 
         for x in range(size):
             for y in range(size):
                 if biome_handler.get_real_height(x, y) > 0:
-                    image_rgb.putpixel((x, y), biome_handler.get_biome_color(biome_handler.get_biome(x, y)))
+                    biome_map.putpixel((x, y), biome_handler.get_biome_color(biome_handler.get_biome(x, y)))
 
-        biome_handler.plot_points()
-
-        image_rgb.save(f"static/images/{map_name}_biomes.png")
+        original_map = Image.open(f"static/images/{map_name}_geo.png").convert("RGBA")
+        overlayed_map = Image.alpha_composite(original_map, biome_map)
+        overlayed_map.save(f"static/images/{map_name}_biomes.png")

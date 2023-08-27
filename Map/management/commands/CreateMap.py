@@ -3,7 +3,7 @@ from django.core.management import call_command
 from PIL import Image
 import random
 import json
-from Map.utils.map_utils import get_tile_color, map_value, distance, get_height
+from Map.utils.map_utils import get_tile_color, map_value, distance, get_height, scale_value
 
 class Command(BaseCommand):
     help = 'Creates a new map with new Tiles, Areas and Civilizations'
@@ -54,6 +54,8 @@ class Command(BaseCommand):
         for x in range(size):
             for y in range(size):
                 height = get_height(x, y, octaves, seed, size, border)
+                #if height > 0: height = scale_value(height, lambda v: v**2*1.5, False)
+                # if height > 0: height = scale_value(height, lambda v: (v*2)**3/2, False)
             
                 height_fixed = int((height + 1) * 127.5)
                 height_max = max(height_fixed, height_max)
@@ -96,7 +98,7 @@ class Command(BaseCommand):
         with open(f"static/map_jsons/{name}.json", 'w') as f:
             json.dump(map_info, f, indent=4)
                 
-        call_command("CreateReservoirs", number=riversnumber)
         call_command("CreateBiomes")
+        call_command("CreateReservoirs", number=riversnumber)
         call_command("CreateShadowMap", depth=depth)
         call_command("CreateAreas", mountain=mountain)

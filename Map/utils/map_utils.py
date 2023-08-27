@@ -21,7 +21,7 @@ COLORS_WATER = [
 HEIGHTS_LAND = [
     0.15,
     0.3,
-    0.45,
+    0.5,
     0.65,
     0.8,
     1.0
@@ -51,6 +51,10 @@ def map_value(value, min1, max1, min2, max2):
     value_scaled = float(value - min1) / float(span1)
 
     return min2 + (value_scaled * span2)
+
+def scale_value(value, scale, normalize=True):
+    if normalize: return map_value(value, scale(0), scale(1), 0, 1)
+    return scale(value)
 
 def distance(x1, y1, x2, y2):
     return ((x2-x1)**2 + (y2-y1)**2)**0.5

@@ -80,16 +80,21 @@ class BiomeHandler(MapHandler):
 
         plt.show()
 
+    def get_humidity(self, x, y):
+        return self.noise_humidity([x/100, y/50]) + 0.5
 
-    def get_biome(self, x, y):
+    def get_temperature(self, x, y):
+        return (self.noise_temperature([x/100, y/50]) - self.get_real_height(x, y)/2) * 1.5 + (1 - distance_to_equator(x, self.size))
+
+    def get_biome(self, x, y, plot=False):
         humidity = self.noise_humidity([x/100, y/50]) + 0.5
-        temperature = (self.noise_temperature([x/100, y/50]) - self.get_real_height(x, y)/2) * 1.5
-        self.points.append((temperature, humidity))
+        temperature = (self.noise_temperature([x/100, y/50]) - self.get_real_height(x, y)/2) * 1.5 + (1 - distance_to_equator(x, self.size))
+        if plot: self.points.append((temperature, humidity))
 
         return self.get_closest_biome((humidity, temperature), BIOME_RULES)
 
     def get_map_field(self, field_name):
-        map_name = self.map_name.replace("_geo", "").replace("_political", "").replace(".png", "")
+        map_name = self.map_name[:self.map_name.rfind("_")] if self.map_name.rfind("_") != -1 else self.map_name
         with open(f"static/map_jsons/{map_name}.json") as f:
             data = json.load(f)
             if field_name in data.keys():
@@ -118,14 +123,20 @@ class BiomeHandler(MapHandler):
             self.seed_temperature = random.randint(1, 10000)
             self.set_map_field("seed_temperature", self.seed_temperature)
 
-        self.noise_humidity = PerlinNoise(octaves=3, seed=self.seed_himidity)
-        self.noise_temperature = PerlinNoise(octaves=3, seed=self.seed_temperature)
+        self.noise_humidity = PerlinNoise(octaves=2, seed=self.seed_himidity)
+        self.noise_temperature = PerlinNoise(octaves=2, seed=self.seed_temperature)
 
-
-
+def get_temp_hum(map_name, x, y):
+    biome_handler = BiomeHandler(map_name)
+    biome_handler.load_biome_info()
+    biome_handler.load_map_info()
+    return f"T {biome_handler.get_temperature(x, y):.2f}, H {biome_handler.get_humidity(x, y):.2f}"
 
 def distance(x1, y1, x2, y2):
     return ((x2-x1)**2 + (y2-y1)**2)**0.5
+
+def distance_to_equator(y, size):
+    return abs(y - size/2)/(size/2)
 
 if __name__ == "__main__":
     n = 50000

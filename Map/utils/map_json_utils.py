@@ -1,5 +1,5 @@
 from perlin_noise import PerlinNoise
-from .map_utils import get_height, map_value
+from .map_utils import get_height, map_value, scale_value
 import json
 import time
 
@@ -11,7 +11,7 @@ class MapHandler:
         self.map_name = map_name
 
     def get_map_field(self, field_name):
-        map_name = self.map_name[:self.map_name.rfind("_")]
+        map_name = self.map_name[:self.map_name.rfind("_")] if self.map_name.rfind("_") != -1 else self.map_name
         with open(f"static/map_jsons/{map_name}.json") as f:
             data = json.load(f)
             return data[field_name]
@@ -47,7 +47,7 @@ class MapHandler:
 
 
 def get_map_field(map_name, field_name):
-    map_name = map_name[:map_name.rfind("_")]
+    map_name = map_name[:map_name.rfind("_")] if map_name.rfind("_") != -1 else map_name
     with open(f"static/map_jsons/{map_name}.json") as f:
         data = json.load(f)
         return data[field_name]
@@ -59,8 +59,12 @@ def get_real_height(map_name, x, y):
     sea_level = get_map_field(map_name, "sea_level")
     border = get_map_field(map_name, "border")
 
-    return get_height(x, y, octaves, seed, size, border) - sea_level
-    
+    #return scale_value(get_height(x, y, octaves, seed, size, border) - sea_level, lambda v: v**2*1.5, False)
+
+    height = get_height(x, y, octaves, seed, size, border) - sea_level
+    #if height > 0: height = scale_value(get_height(x, y, octaves, seed, size, border) - sea_level, lambda v: v**2*1.5, False)
+    return height
+
 def get_mapped_height(map_name, x, y):
     
     height = get_real_height(map_name, x, y)
@@ -115,7 +119,7 @@ def find_binary(tile, all_tiles):
     return False
 
 def get_area(map_name, x, y):
-    map_name = map_name[:map_name.rfind("_")]
+    map_name = map_name[:map_name.rfind("_")] if map_name.rfind("_") != -1 else map_name
     with open(f"static/map_jsons/{map_name}.json") as f:
         data = json.load(f)
 

@@ -87,6 +87,10 @@ class Command(BaseCommand):
         overlayed_map = Image.alpha_composite(original_map, river_map)
         overlayed_map.save(f"static/images/{map_name}_political.png")
 
+        original_map = Image.open(f"static/images/{map_name}_biomes.png").convert("RGBA")
+        overlayed_map = Image.alpha_composite(original_map, river_map)
+        overlayed_map.save(f"static/images/{map_name}_biomes.png")
+
         for river in rivers:
             map_handler.add_map_field("rivers", {"name": generate_random_string(), "tiles": sort_tiles(river)})
 
