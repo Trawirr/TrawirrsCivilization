@@ -1,5 +1,5 @@
 from perlin_noise import PerlinNoise
-from .map_utils import get_height, map_value, scale_value
+from .map_utils import get_height, map_value, scale_value, lower_height
 import json
 import time
 
@@ -10,11 +10,24 @@ class MapHandler:
     def __init__(self, map_name) -> None:
         self.map_name = map_name
 
-    def get_map_field(self, field_name):
+    def get_map_field(self, field_names):
         map_name = self.map_name[:self.map_name.rfind("_")] if self.map_name.rfind("_") != -1 else self.map_name
         with open(f"static/map_jsons/{map_name}.json") as f:
             data = json.load(f)
-            return data[field_name]
+            tmp = None
+            try:
+                if isinstance(field_names, str): raise TypeError
+            except:
+                if field_names in data.keys():
+                    tmp = data[field_names]
+            else:
+                tmp = []
+                for field_name in field_names:
+                    if field_name in data.keys():
+                        tmp.append(data[field_name])
+                    else:
+                        tmp.append(None)
+        return tmp
         
     def add_map_field(self, name, value):
         with open(f"static/map_jsons/{self.map_name}.json", 'r') as file:
@@ -28,11 +41,7 @@ class MapHandler:
             json.dump(map_info, f, indent=4)
 
     def load_map_info(self):
-        self.octaves = self.get_map_field("octaves")
-        self.size = self.get_map_field("size")
-        self.seed = self.get_map_field("seed")
-        self.sea_level = self.get_map_field("sea_level")
-        self.border = self.get_map_field("border")
+        self.octaves, self.size, self.seed, self.sea_level, self.border = self.get_map_field(["octaves", "size", "seed", "sea_level", "border"])
 
     def get_real_height(self, x, y):
         return get_height(x, y, self.octaves, self.seed, self.size, self.border) - self.sea_level
@@ -45,12 +54,43 @@ class MapHandler:
         else:
             return map_value(height, 0, 1, 1, 5000)
 
+    def get_area(self, x, y):
+        map_name = self.map_name[:self.map_name.rfind("_")] if self.map_name.rfind("_") != -1 else self.map_name
+        with open(f"static/map_jsons/{map_name}.json") as f:
+            data = json.load(f)
 
-def get_map_field(map_name, field_name):
+        coords = (x, y)
+        h = self.get_mapped_height(x, y)
+        area_types = WATER_TYPES if h < 0 else LAND_TYPES
+
+        for area_type in area_types:
+            for area in data[area_type]:
+                if find_binary(coords, area['tiles']):
+                    return f"{area_type[0].upper() + area_type[1:-1]} {area['name']}"
+        return None
+
+
+
+
+def get_map_field(map_name, field_names):
     map_name = map_name[:map_name.rfind("_")] if map_name.rfind("_") != -1 else map_name
     with open(f"static/map_jsons/{map_name}.json") as f:
         data = json.load(f)
-        return data[field_name]
+        tmp = None
+        try:
+            if isinstance(field_names, str): raise TypeError
+        except:
+            if field_names in data.keys():
+                tmp = data[field_names]
+        else:
+            tmp = []
+            for field_name in field_names:
+                if field_name in data.keys():
+                    tmp.append(data[field_name])
+                else:
+                    tmp.append(None)
+        
+        return tmp
     
 def get_real_height(map_name, x, y):
     octaves = get_map_field(map_name, "octaves")
@@ -62,6 +102,7 @@ def get_real_height(map_name, x, y):
     #return scale_value(get_height(x, y, octaves, seed, size, border) - sea_level, lambda v: v**2*1.5, False)
 
     height = get_height(x, y, octaves, seed, size, border) - sea_level
+    if height > 0: height = lower_height(height)
     #if height > 0: height = scale_value(get_height(x, y, octaves, seed, size, border) - sea_level, lambda v: v**2*1.5, False)
     return height
 
@@ -113,30 +154,5 @@ def find_binary(tile, all_tiles):
         elif y > y_index:
             left = index + 1  # Adjusted the left boundary
         else:
-            print("binary: True")
             return True
-    print("binary: False")
     return False
-
-def get_area(map_name, x, y):
-    map_name = map_name[:map_name.rfind("_")] if map_name.rfind("_") != -1 else map_name
-    with open(f"static/map_jsons/{map_name}.json") as f:
-        data = json.load(f)
-
-    coords = (x, y)
-    h = get_mapped_height(map_name, x, y)
-    area_types = WATER_TYPES if h < 0 else LAND_TYPES
-
-    start = time.time()
-    for area_type in area_types:
-        print("\n", area_type)
-        for area in data[area_type]:
-            print(area_type, area['name'])
-#            print(area_type, area['name'])
-            if coords in area['tiles'] != find_binary(coords, area['tiles']):
-                print(coords in area['tiles'], find_binary(coords, area['tiles']))
-            if find_binary(coords, area['tiles']):
-                print("-- Found --")
-                return f"{area_type[0].upper() + area_type[1:-1]} {area['name']}"
-    print(f"{time.time() - start}s")
-    return None

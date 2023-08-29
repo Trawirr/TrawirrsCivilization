@@ -3,6 +3,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from perlin_noise import PerlinNoise
 import json
+import time
 
 from Map.utils.map_json_utils import MapHandler
 
@@ -80,26 +81,36 @@ class BiomeHandler(MapHandler):
 
         plt.show()
 
-    def get_humidity(self, x, y):
-        return self.noise_humidity([x/100, y/50]) + 0.5
+    def count_nearby_water_tiles(self, x, y, r=2):
+        water_counter = 0
+        lakes = [lake_coords for lake_coords in self.get_map_field('lakes')]
+        rivers = [river_coords for river_coords in self.get_map_field('rivers')]
+
+        for xx in range(x-r, x+r+1):
+            for yy in range(y-r, y+r+1):
+                if xx < 0 or yy < 0 or xx >= self.size or yy >= self.size:
+                    continue
+                if self.get_real_height(xx, yy) < 0:
+                    water_counter += 1
+                else:
+                    if (xx, yy) in lakes:
+                        water_counter += 1
+                    elif (xx, yy) in rivers:
+                        water_counter += 1
+        return water_counter
+
+    def get_humidity(self, x, y, r=4):
+        return self.noise_humidity([x/100, y/50]) + self.count_nearby_water_tiles(x, y, r)/(r+1)**2/5
 
     def get_temperature(self, x, y):
-        return (self.noise_temperature([x/100, y/50]) - self.get_real_height(x, y)/2) * 1.5 + (1 - distance_to_equator(x, self.size))
+        return (self.noise_temperature([x/100, y/50]) - self.get_real_height(x, y)) * 1.5 + (1 - distance_to_equator(x, self.size))
 
     def get_biome(self, x, y, plot=False):
-        humidity = self.noise_humidity([x/100, y/50]) + 0.5
-        temperature = (self.noise_temperature([x/100, y/50]) - self.get_real_height(x, y)/2) * 1.5 + (1 - distance_to_equator(x, self.size))
+        humidity = self.get_humidity(x, y)
+        temperature = self.get_temperature(x, y)
         if plot: self.points.append((temperature, humidity))
 
         return self.get_closest_biome((humidity, temperature), BIOME_RULES)
-
-    def get_map_field(self, field_name):
-        map_name = self.map_name[:self.map_name.rfind("_")] if self.map_name.rfind("_") != -1 else self.map_name
-        with open(f"static/map_jsons/{map_name}.json") as f:
-            data = json.load(f)
-            if field_name in data.keys():
-                return data[field_name]
-            return None
         
     def set_map_field(self, name, value):
         with open(f"static/map_jsons/{self.map_name}.json", 'r') as file:
@@ -111,26 +122,20 @@ class BiomeHandler(MapHandler):
             json.dump(map_info, f, indent=4)
 
     def load_biome_info(self):
-        if self.get_map_field("seed_humidity"):
-            self.seed_himidity = self.get_map_field("seed_humidity")
-        else:
-            self.seed_himidity = random.randint(1, 10000)
-            self.set_map_field("seed_humidity", self.seed_himidity)
+        self.seed_humidity, self.seed_temperature = self.get_map_field(["seed_humidity", "seed_temperature"])
+        if not self.seed_humidity:
+            self.seed_humidity = random.randint(1, 10000)
+            self.set_map_field("seed_humidity", self.seed_humidity)
             
-        if self.get_map_field("seed_temperature"):
-            self.seed_temperature = self.get_map_field("seed_temperature")
-        else:
+        if not self.seed_temperature:
             self.seed_temperature = random.randint(1, 10000)
             self.set_map_field("seed_temperature", self.seed_temperature)
 
-        self.noise_humidity = PerlinNoise(octaves=2, seed=self.seed_himidity)
+        self.noise_humidity = PerlinNoise(octaves=2, seed=self.seed_humidity)
         self.noise_temperature = PerlinNoise(octaves=2, seed=self.seed_temperature)
 
-def get_temp_hum(map_name, x, y):
-    biome_handler = BiomeHandler(map_name)
-    biome_handler.load_biome_info()
-    biome_handler.load_map_info()
-    return f"T {biome_handler.get_temperature(x, y):.2f}, H {biome_handler.get_humidity(x, y):.2f}"
+    def get_temp_hum(self, x, y):
+        return f"T {self.get_temperature(x, y):.2f}, H {self.get_humidity(x, y):.2f}"
 
 def distance(x1, y1, x2, y2):
     return ((x2-x1)**2 + (y2-y1)**2)**0.5

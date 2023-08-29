@@ -19,7 +19,7 @@ COLORS_WATER = [
 ]
 
 HEIGHTS_LAND = [
-    0.15,
+    0.1,
     0.3,
     0.5,
     0.65,
@@ -44,7 +44,7 @@ def generate_random_string(length=10):
     return filename
 
 def map_value(value, min1, max1, min2, max2):
-    value = min(value, max1)
+    value = max(min(value, max1), min1)
     span1 = max1 - min1
     span2 = max2 - min2
 
@@ -55,6 +55,9 @@ def map_value(value, min1, max1, min2, max2):
 def scale_value(value, scale, normalize=True):
     if normalize: return map_value(value, scale(0), scale(1), 0, 1)
     return scale(value)
+
+def lower_height(height):
+    return height**(map_value(height, 0, 0.3, 3, 1))
 
 def distance(x1, y1, x2, y2):
     return ((x2-x1)**2 + (y2-y1)**2)**0.5
