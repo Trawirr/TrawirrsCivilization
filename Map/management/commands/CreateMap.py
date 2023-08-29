@@ -3,7 +3,7 @@ from django.core.management import call_command
 from PIL import Image
 import random
 import json
-from Map.utils.map_utils import get_tile_color, map_value, distance, get_height, scale_value
+from Map.utils.map_utils import get_tile_color, map_value, distance, get_height, scale_value, lower_height
 
 class Command(BaseCommand):
     help = 'Creates a new map with new Tiles, Areas and Civilizations'
@@ -54,9 +54,8 @@ class Command(BaseCommand):
         for x in range(size):
             for y in range(size):
                 height = get_height(x, y, octaves, seed, size, border)
-                #if height > 0: height = scale_value(height, lambda v: v**2*1.5, False)
-                # if height > 0: height = scale_value(height, lambda v: (v*2)**3/2, False)
-            
+                if height > 0: height = lower_height(height)
+                
                 height_fixed = int((height + 1) * 127.5)
                 height_max = max(height_fixed, height_max)
                 height_max2 = max(height, height_max2)

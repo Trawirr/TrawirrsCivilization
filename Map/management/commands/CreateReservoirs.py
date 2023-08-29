@@ -68,15 +68,11 @@ class Command(BaseCommand):
                 lakes.append(lake_coords)
                 lake_coords = []
 
-        import time
-        start = time.time()
         for lake in lakes:
             for lake_coords in lake:
                 for river in rivers:
                     if lake_coords in river:
-                        print(lake_coords)
                         river.remove(lake_coords)
-        print(f"Deleting lakes from rivers: {time.time() - start}s")
 
 
         original_map = Image.open(f"static/images/{map_name}_geo.png").convert("RGBA")
@@ -96,19 +92,6 @@ class Command(BaseCommand):
 
         for lake in lakes:
             map_handler.add_map_field("lakes", {"name": generate_random_string(), "tiles": sort_tiles(lake)})
-
-        # reservoirs_info = {
-        #     "rivers": [} for river in rivers],
-        #     "lakes": [{"name": generate_random_string(), "tiles": sort_tiles(lake)} for lake in lakes]
-        # }
-
-        # with open(f"static/map_jsons/{map_name}.json", 'r') as file:
-        #     map_info = json.load(file)
-
-        # new_map_info = {**map_info, **reservoirs_info}
-
-        # with open(f"static/map_jsons/{map_name}.json", 'w') as f:
-        #     json.dump(new_map_info, f, indent=4)
 
 def check_rivers(coords, rivers):
     for river in rivers:
