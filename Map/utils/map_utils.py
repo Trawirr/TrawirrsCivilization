@@ -19,7 +19,7 @@ COLORS_WATER = [
 ]
 
 HEIGHTS_LAND = [
-    0.1,
+    0.15,
     0.3,
     0.5,
     0.65,
@@ -42,6 +42,11 @@ def generate_random_string(length=10):
     random_chars = [random.choice(characters) for _ in range(length)]
     filename = "".join(random_chars)
     return filename
+
+def get_name(filename, n=1):
+    with open(f"static/names/{filename}.txt") as f:
+        names = [n.strip() for n in f.readlines()]
+    return random.sample(names, n)
 
 def map_value(value, min1, max1, min2, max2):
     value = max(min(value, max1), min1)

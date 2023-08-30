@@ -16,6 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         map_name = options['mapname']
+        print(f"Creating biomes: map_name = {map_name}")
         biome_handler = BiomeHandler(map_name)
         biome_handler.load_map_info()
         biome_handler.load_biome_info()

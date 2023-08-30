@@ -4,7 +4,7 @@ import random
 import json
 import time
 from Map.utils.map_json_utils import get_map_field, get_mapped_height, sort_tiles, MapHandler
-from Map.utils.map_utils import generate_random_string
+from Map.utils.map_utils import generate_random_string, get_name
 
 class Command(BaseCommand):
     help = 'Creates land and water areas on <mapname> map'
@@ -35,16 +35,22 @@ class Command(BaseCommand):
                     if h > mountain:
                         mountain_tiles.append((x, y))
 
-        for reservoir in split_areas(water_tiles):
+        tiles_split = split_areas(water_tiles)
+        tiles_names = {"seas": get_name("seas", len(tiles_split)), "lakes": get_name("lakes", len(tiles_split))}
+        for i, reservoir in enumerate(tiles_split):
             area_type = "seas" if len(reservoir) > 400 else "lakes"
-            map_handler.add_map_field(area_type, {"name": generate_random_string(), "tiles": sort_tiles(reservoir)})
+            map_handler.add_map_field(area_type, {"name": tiles_names[area_type][i], "tiles": sort_tiles(reservoir)})
 
-        for land in split_areas(land_tiles):
+        tiles_split = split_areas(land_tiles)
+        tiles_names = {"continents": get_name("continents", len(tiles_split)), "islands": get_name("islands", len(tiles_split))}
+        for i, land in enumerate(tiles_split):
             area_type = "continents" if len(land) > 500 else "islands"
-            map_handler.add_map_field(area_type, {"name": generate_random_string(), "tiles": sort_tiles(land)})
+            map_handler.add_map_field(area_type, {"name": tiles_names[area_type][i], "tiles": sort_tiles(land)})
 
-        for mountain in split_areas(mountain_tiles):
-            map_handler.add_map_field("mountains", {"name": generate_random_string(), "tiles": sort_tiles(mountain)})
+        tiles_split = split_areas(mountain_tiles)
+        tiles_names = get_name("mountains", len(tiles_split))
+        for i, mountain in enumerate(tiles_split):
+            map_handler.add_map_field("mountains", {"name": tiles_names[i], "tiles": sort_tiles(mountain)})
 
 def get_adjacent_tiles(coords, adjacency_type="normal"):
     x, y = coords

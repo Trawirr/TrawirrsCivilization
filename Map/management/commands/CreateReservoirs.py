@@ -4,7 +4,7 @@ import random
 import json
 #from Map.utils.map_utils import get_tile_color, map_value, distance, get_height
 from Map.utils.map_json_utils import get_mapped_height, get_map_field, get_lowest_adjacent, sort_tiles, MapHandler
-from Map.utils.map_utils import COLORS_WATER, generate_random_string
+from Map.utils.map_utils import COLORS_WATER, generate_random_string, get_name
 
 class Command(BaseCommand):
     help = 'Creates <number> reservoirs on <mapname> map'
@@ -87,11 +87,13 @@ class Command(BaseCommand):
         overlayed_map = Image.alpha_composite(original_map, river_map)
         overlayed_map.save(f"static/images/{map_name}_biomes.png")
 
-        for river in rivers:
-            map_handler.add_map_field("rivers", {"name": generate_random_string(), "tiles": sort_tiles(river)})
+        names = get_name("rivers", len(rivers))
+        for i, river in enumerate(rivers):
+            map_handler.add_map_field("rivers", {"name": names[i], "tiles": sort_tiles(river)})
 
-        for lake in lakes:
-            map_handler.add_map_field("lakes", {"name": generate_random_string(), "tiles": sort_tiles(lake)})
+        names = get_name("lakes", len(lakes))
+        for i, lake in enumerate(lakes):
+            map_handler.add_map_field("lakes", {"name": names[i], "tiles": sort_tiles(lake)})
 
 def check_rivers(coords, rivers):
     for river in rivers:
