@@ -99,8 +99,8 @@ class BiomeHandler(MapHandler):
                         water_counter += 1
         return water_counter
 
-    def get_humidity(self, x, y, r=4):
-        return self.noise_humidity([x/100, y/50]) + self.count_nearby_water_tiles(x, y, r)/(r+1)**2/5
+    def get_humidity(self, x, y, r=3):
+        return self.noise_humidity([x/100, y/50]) + self.count_nearby_water_tiles(x, y, r)/(r+1)**2/5 + 0.25
 
     def get_temperature(self, x, y):
         return (self.noise_temperature([x/100, y/50]) - self.get_real_height(x, y)) * 1.5 + (1 - distance_to_equator(x, self.size))
