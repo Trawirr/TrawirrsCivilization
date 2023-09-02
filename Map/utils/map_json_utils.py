@@ -2,6 +2,7 @@ from perlin_noise import PerlinNoise
 from .map_utils import get_height, map_value, scale_value, lower_height
 import json
 import time
+import os
 
 LAND_TYPES = ['mountains', 'rivers', 'lakes', 'islands', 'continents']
 WATER_TYPES = ['lakes', 'seas']
@@ -30,6 +31,7 @@ class MapHandler:
         return tmp
         
     def add_map_field(self, name, value):
+        map_name = self.map_name[:self.map_name.rfind("_")] if self.map_name.rfind("_") != -1 else self.map_name
         with open(f"static/map_jsons/{self.map_name}.json", 'r') as file:
             map_info = json.load(file)
         if name not in map_info.keys():
@@ -44,6 +46,7 @@ class MapHandler:
         self.octaves, self.size, self.seed, self.sea_level, self.border = self.get_map_field(["octaves", "size", "seed", "sea_level", "border"])
 
     def get_real_height(self, x, y):
+        #print(x, y, f"{lower_height(get_height(x, y, self.octaves, self.seed, self.size, self.border))} - {self.sea_level} = {get_height(x, y, self.octaves, self.seed, self.size, self.border) - self.sea_level}")
         return get_height(x, y, self.octaves, self.seed, self.size, self.border) - self.sea_level
     
     def get_mapped_height(self, x, y):
@@ -156,3 +159,20 @@ def find_binary(tile, all_tiles):
         else:
             return True
     return False
+
+def get_map_names():
+    directory_path = "static/images"
+    file_names = []
+    try:
+        entries = os.listdir(directory_path)
+
+        for entry in entries:
+            entry_path = os.path.join(directory_path, entry)
+            if os.path.isfile(entry_path):
+                file_names.append(entry)
+
+    except OSError as e:
+        print(f"Error reading directory '{directory_path}': {e}")
+
+    file_names = set([file_name[:file_name.find("_")] for file_name in file_names if "_" in file_name])
+    return file_names

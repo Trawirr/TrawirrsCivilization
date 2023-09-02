@@ -50,38 +50,34 @@ class Command(BaseCommand):
         image = Image.new("L", (size, size))
         image_rgb = Image.new("RGB", (size, size))
         image_political = Image.new("RGB", (size, size))
-        height_max, height_max2 = 0, 0
         for x in range(size):
             for y in range(size):
-                height = get_height(x, y, octaves, seed, size, border)
+                height = get_height(x, y, octaves, seed, size, border) - sea_level
                 if height > 0: height = lower_height(height)
-                
-                height_fixed = int((height + 1) * 127.5)
-                height_max = max(height_fixed, height_max)
-                height_max2 = max(height, height_max2)
-                image.putpixel((x, y), height_fixed)
 
-                if height <= sea_level:
+                if height <= 0:
                     tile_type = "water"
                     bottom = -limit
-                    top = sea_level
+                    top = 0
                     political_color = (45, 185, 255)
                 else:
                     tile_type = "land"
-                    bottom = sea_level
+                    bottom = 0
                     top = limit
                     political_color = (255, 255, 255)
+
+                #print(f"({x}, {y}) {tile_type} -> {height:.4f} < {sea_level:.4f} -> {get_tile_color(height, bottom, top, tile_type)}")
 
                 image_rgb.putpixel((x, y), get_tile_color(height, bottom, top, tile_type))
                 image_political.putpixel((x, y), political_color)
 
-        image.save(f"static/images/{name}_gray.png")
         image_rgb.save(f"static/images/{name}_geo.png")
         image_political.save(f"static/images/{name}_political.png")
 
         map_info = {
             "size": size,
             "octaves": octaves,
+            "sea_level_arg": sea_level_arg,
             "sea_level": sea_level,
             "border": border,
             "seed": seed,
@@ -97,7 +93,16 @@ class Command(BaseCommand):
         with open(f"static/map_jsons/{name}.json", 'w') as f:
             json.dump(map_info, f, indent=4)
                 
-        call_command("CreateBiomes")
-        call_command("CreateReservoirs", number=riversnumber)
-        call_command("CreateShadowMap", depth=depth)
-        call_command("CreateAreas", mountain=mountain)
+        import time
+        start = time.time()
+        call_command("CreateBiomes", mapname=name)
+        print(f"time: {time.time() - start}s\n")
+        start = time.time()
+        call_command("CreateReservoirs", mapname=name, number=riversnumber)
+        print(f"time: {time.time() - start}s\n")
+        start = time.time()
+        call_command("CreateShadowMap", mapname=name, depth=depth)
+        print(f"time: {time.time() - start}s\n")
+        start = time.time()
+        call_command("CreateAreas", mapname=name, mountain=mountain)
+        print(f"time: {time.time() - start}s\n")

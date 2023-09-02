@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.core.management import call_command
 from .utils.map_utils import generate_random_string, map_value
-from .utils.map_json_utils import get_map_field, get_mapped_height
+from .utils.map_json_utils import get_map_field, get_mapped_height, get_map_names
 from .utils.map_image_utils import get_pixel_color
 from .utils.biomes_utils import BiomeHandler
 
@@ -59,3 +59,7 @@ def get_tooltip(request):
         tooltip_content += f"<br>{reservoir}"
 
     return HttpResponse(tooltip_content)
+
+def gallery_view(request):
+    context = {"maps": get_map_names()}
+    return render(request, 'gallery.html', context)

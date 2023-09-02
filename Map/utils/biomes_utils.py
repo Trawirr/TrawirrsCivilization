@@ -99,8 +99,24 @@ class BiomeHandler(MapHandler):
                         water_counter += 1
         return water_counter
 
+    def check_water(self, x, y, r=3):
+        lakes = [lake_coords for lake_coords in self.get_map_field('lakes')]
+        rivers = [river_coords for river_coords in self.get_map_field('rivers')]
+
+        all_tiles = [(xx, yy) for xx in range(x-r, x+r+1) for yy in range(y-r, y+r+1)]
+
+        while all_tiles:
+            tile = all_tiles.pop(random.randint(0, len(all_tiles) - 1))
+            if tile in rivers:
+                return 1
+            elif tile in lakes:
+                return 1
+            elif self.get_real_height(tile[0], tile[1]) < 0:
+                return 1
+        return 0
+
     def get_humidity(self, x, y, r=3):
-        return self.noise_humidity([x/100, y/50]) + self.count_nearby_water_tiles(x, y, r)/(r+1)**2/5 + 0.25
+        return (self.noise_humidity([x/100, y/50]) + 0.25) * (1 + self.check_water(x, y) * 0.5)
 
     def get_temperature(self, x, y):
         return (self.noise_temperature([x/100, y/50]) - self.get_real_height(x, y)) * 1.5 + (1 - distance_to_equator(x, self.size))
@@ -113,12 +129,13 @@ class BiomeHandler(MapHandler):
         return self.get_closest_biome((humidity, temperature), BIOME_RULES)
         
     def set_map_field(self, name, value):
-        with open(f"static/map_jsons/{self.map_name}.json", 'r') as file:
+        map_name = self.map_name[:self.map_name.rfind("_")] if self.map_name.rfind("_") != -1 else self.map_name
+        with open(f"static/map_jsons/{map_name}.json", 'r') as file:
             map_info = json.load(file)
 
         map_info[name] = value
 
-        with open(f"static/map_jsons/{self.map_name}.json", 'w') as f:
+        with open(f"static/map_jsons/{map_name}.json", 'w') as f:
             json.dump(map_info, f, indent=4)
 
     def load_biome_info(self):

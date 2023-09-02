@@ -1,0 +1,14 @@
+{% load static %}
+
+<div class="gallery">
+    {% for map in maps %}
+    <div class="gallery-item" hx-get="/map/{{ map }}_geo.png" hx-swap="innerHTML" hx-target=".main" hx-trigger="click">
+        <img src="{% static 'images/' %}{{ map }}_geo.png" alt="{{ map }}">
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    var map = document.querySelector('.gallery-click');
+    htmx.process(map);
+</script>
