@@ -1,20 +1,20 @@
-    Islay
-    Phuquoc
-    Hainan
-    Palagruza
-    Samosir
-    Gough
-    Fuvahmulah
-    Flores
-    Gozo
-    Ambon
-    Volin
-    Elugelab
-    Pantelleria
-    Rennell
-    Tetepare
-    Ulleungdo
-    Anegada
-    Baltrum
-    Bonin
-    Cayman
+    Lonstone Isle
+    Phuquoc Island
+    Hainan Island
+    Palagruza Isle
+    Samosir Island
+    Gough Island
+    Fuvahmulah Isle
+    Flores Island
+    Gozo Isle
+    Ambon Island
+    Volin Isle
+    Elugelab Island
+    Pantelleria Isle
+    Rennell Island
+    Tetepare Island
+    Ulleungdo Island
+    Anegada Isle
+    Baltrum Island
+    Bonin Isle
+    Cayman Island

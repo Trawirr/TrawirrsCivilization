@@ -72,11 +72,9 @@ class MapHandler:
         for area_type in area_types:
             for area in data[area_type]:
                 if find_binary(coords, area['tiles']):
-                    return f"{area_type[0].upper() + area_type[1:-1]} {area['name']}"
+                    return area['name']
         return None
-
-
-
+    
 
 def get_map_field(map_name, field_names):
     map_name = map_name[:map_name.rfind("_")] if map_name.rfind("_") != -1 else map_name

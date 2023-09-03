@@ -1,30 +1,30 @@
-Vatnajokull
-Bled
-Sils
-Tjornin
-Balaton
-Gardsjon
-Lucerne
-Eibsee
-Saimaa
-Vetlanda
-Nydal
-Eldreth
-Luriston
-Gennesaret
-Rogen
-Sevan
-Reschen
-Tana
-Sturmrill
-Bygdin
-Uddjaur
-Atna
-Siljan
-Pielinen
-Lyseren
-Divico
-Vinuela
-Nisset
-Achen
-Rara
+Vatnajokull Lake
+Bled Lake
+Sils Lake
+Tjornin Lake
+Balaton Lake
+Gardsjon Lake
+Lucerne Lake
+Eibsee Lake
+Saimaa Lake
+Vetlanda Lake
+Nydal Lake
+Eldreth Lake
+Luriston Lake
+Gennesaret Lake
+Rogen Lake
+Sevan Lake
+Reschen Lake
+Tana Lake
+Sturmrill Lake
+Bygdin Lake
+Uddjaur Lake
+Atna Lake
+Siljan Lake
+Pielinen Lake
+Lyseren Lake
+Divico Lake
+Vinuela Lake
+Nisset Lake
+Achen Lake
+Rara Lake
