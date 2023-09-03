@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.core.management import call_command
-from .utils.map_utils import generate_random_string, map_value
+from .utils.map_utils import generate_random_string, map_value, get_tile_color
 from .utils.map_json_utils import get_map_field, get_mapped_height, get_map_names
 from .utils.map_image_utils import get_pixel_color
 from .utils.biomes_utils import BiomeHandler
@@ -52,7 +52,7 @@ def get_tooltip(request):
     map_handler.load_biome_info()
 
     height = map_handler.get_mapped_height(x, y)
-    tooltip_content = f'({x}, {y})<br>Height: {height:.2f}m<br>{map_handler.get_temp_hum(x, y)}'
+    tooltip_content = f'({x}, {y})<br>Height: {height:.2f}m'
 
     reservoir = map_handler.get_area(x, y)
     if reservoir:

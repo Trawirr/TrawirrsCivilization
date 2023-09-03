@@ -19,8 +19,8 @@ COLORS_WATER = [
 ]
 
 HEIGHTS_LAND = [
-    0.15,
-    0.3,
+    0.1,
+    0.25,
     0.5,
     0.65,
     0.8,
@@ -62,7 +62,7 @@ def scale_value(value, scale, normalize=True):
     return scale(value)
 
 def lower_height(height):
-    return height**(map_value(height, 0, 0.3, 3, 1))
+    return height**(map_value(height, 0, 0.25, 1.5, 1))
 
 def distance(x1, y1, x2, y2):
     return ((x2-x1)**2 + (y2-y1)**2)**0.5
@@ -78,6 +78,9 @@ def get_height(x, y, octaves, seed, size, border):
         distance_from_edge = distance(x, y, size//2, size//2) - size//2 + border
         if distance_from_edge > 0:
             height -= map_value(distance_from_edge, 0, border, 0, limit)
+
+    if height > 0:
+        height = lower_height(height)
     return height
 
 def get_color(height, tile_type="land"):

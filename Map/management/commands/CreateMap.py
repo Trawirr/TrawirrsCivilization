@@ -53,20 +53,18 @@ class Command(BaseCommand):
         for x in range(size):
             for y in range(size):
                 height = get_height(x, y, octaves, seed, size, border) - sea_level
-                if height > 0: height = lower_height(height)
+                #if height > 0: height = lower_height(height)
 
                 if height <= 0:
                     tile_type = "water"
-                    bottom = -limit
+                    bottom = -limit + sea_level
                     top = 0
                     political_color = (45, 185, 255)
                 else:
                     tile_type = "land"
                     bottom = 0
-                    top = limit
+                    top = limit - sea_level
                     political_color = (255, 255, 255)
-
-                #print(f"({x}, {y}) {tile_type} -> {height:.4f} < {sea_level:.4f} -> {get_tile_color(height, bottom, top, tile_type)}")
 
                 image_rgb.putpixel((x, y), get_tile_color(height, bottom, top, tile_type))
                 image_political.putpixel((x, y), political_color)

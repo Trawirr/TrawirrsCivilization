@@ -119,7 +119,7 @@ class BiomeHandler(MapHandler):
         return (self.noise_humidity([x/100, y/50]) + 0.25) * (1 + self.check_water(x, y) * 0.5)
 
     def get_temperature(self, x, y):
-        return (self.noise_temperature([x/100, y/50]) - self.get_real_height(x, y)) * 1.5 + (1 - distance_to_equator(x, self.size))
+        return (self.noise_temperature([x/100, y/50]) - self.get_real_height(x, y)) * 1.5 + (0.5 - distance_to_equator(x, self.size)/2)
 
     def get_biome(self, x, y, plot=False):
         humidity = self.get_humidity(x, y)

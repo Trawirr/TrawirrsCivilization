@@ -47,7 +47,10 @@ class MapHandler:
 
     def get_real_height(self, x, y):
         #print(x, y, f"{lower_height(get_height(x, y, self.octaves, self.seed, self.size, self.border))} - {self.sea_level} = {get_height(x, y, self.octaves, self.seed, self.size, self.border) - self.sea_level}")
-        return get_height(x, y, self.octaves, self.seed, self.size, self.border) - self.sea_level
+        height = get_height(x, y, self.octaves, self.seed, self.size, self.border)
+        if height > 0:
+            height = lower_height(height)
+        return height - self.sea_level
     
     def get_mapped_height(self, x, y):
         height = self.get_real_height(x, y)
