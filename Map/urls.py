@@ -8,5 +8,7 @@ urlpatterns = [
     path('generate', views.generate_map, name='generate'),
     path('get_tooltip', views.get_tooltip, name='tooltip'),
     path('gallery', views.gallery_view, name='gallery'),
+    path('login_view', views.login_view, name='login_view'),
+    path('logout_view', views.logout_view, name='logout_view'),
 
 ]

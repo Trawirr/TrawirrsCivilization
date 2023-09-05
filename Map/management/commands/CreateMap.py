@@ -4,6 +4,7 @@ from PIL import Image
 import random
 import json
 from Map.utils.map_utils import get_tile_color, map_value, distance, get_height, scale_value, lower_height
+from Map.models import Map
 
 class Command(BaseCommand):
     help = 'Creates a new map with new Tiles, Areas and Civilizations'
