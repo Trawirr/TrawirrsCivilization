@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.core.management import call_command
@@ -8,6 +9,9 @@ from .utils.map_utils import generate_random_string, map_value, get_tile_color
 from .utils.map_json_utils import get_map_field, get_mapped_height, get_map_names
 from .utils.map_image_utils import get_pixel_color
 from .utils.biomes_utils import BiomeHandler
+
+def empty_view(request):
+    return HttpResponse()
 
 def main_view(request):
     context = {}
@@ -70,17 +74,30 @@ def gallery_view(request):
     return render(request, 'gallery.html', context)
 
 def login_view(request):
+    print("login view")
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('profile') 
+            return redirect('main')
         else:
             messages.error(request, 'Invalid username or password.')
     return render(request, 'login.html')
 
+def register_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+
+            login(request, user)
+            return redirect('main')
+    else:
+        form = UserCreationForm()
+    return render(request, 'register.html', {'form': form})
+
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect('main')

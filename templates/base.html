@@ -9,9 +9,14 @@
 
     <div class="sidenav">
       <a hx-get="/map/map_geo.png" hx-swap="innerHTML" hx-target=".main"><i class="fas fa-map"></i>Map</a>
-      <a hx-get="/generator" hx-swap="innerHTML" hx-target=".main"><i class="fas fa-globe"></i>Generate Map</a>
-      <a hx-get="/gallery" hx-swap="innerHTML" hx-target=".main"><i class="fas fa-globe"></i>Gallery</a>
-      <a hx-get="/login_view" hx-swap="innerHTML" hx-target=".main"><i class="fas fa-globe"></i>Login</a>
+      <a hx-get="/gallery" hx-swap="innerHTML" hx-target=".main"><i class="fas fa-th-list"></i>Gallery</a>
+      <div style="margin-bottom: 185px;"></div>
+      {% if user.is_authenticated %}
+      <a hx-get="/generator" hx-swap="innerHTML" hx-target=".main"><i class="fas fa-cog"></i>Generate Map</a>
+      <a hx-get="/logout_view" hx-swap="outerHTML" hx-target="body"><i class="fas fa-sign-out-alt"></i>Logout</a>
+      {% else %}
+      <a hx-get="/login_view" hx-swap="innerHTML" hx-target=".main"><i class="fas fa-sign-in-alt"></i>Login</a>
+      {% endif %}
     </div> 
 
     <div class="main">

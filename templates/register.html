@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h2>Register</h2>
+        <form hx-post="register_view" hx-target="body" hx-swap="outerHTML">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Register</button>
+        </form>
+    </body>
+</html>

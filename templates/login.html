@@ -1,11 +1,11 @@
 <h2>Login</h2>
-<p>Don't have an account? <a href="register" style="color: black">Register</a></p>
+<p>Don't have an account? <a hx-get="register_view" hx-target=".main" hx-swap="innerHTML" style="color: black">Register</a></p>
 {% if messages %}
   {% for message in messages %}
     <div class="alert alert-danger">{{ message }}</div>
   {% endfor %}
 {% endif %}
-<form method="post">
+<form hx-post="login_view" hx-target="body" hx-swap="outerHTML">
   {% csrf_token %}
   <div class="form-group">
     <label for="username">Username</label>
