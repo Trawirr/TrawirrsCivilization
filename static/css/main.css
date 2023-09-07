@@ -204,31 +204,39 @@ img {
 }
 
 .gallery-item {
+  position: relative;
   flex-basis: calc(33.33% - 10px);
   margin-bottom: 20px;
   overflow: hidden;
-  position: relative;
+  transition: transform 0.3s; /* Add a transition for smooth movement */
 }
 
 .gallery-item img {
-  width: 100%; /* Make the image fill the entire column */
+  width: 100%;
   height: auto;
   display: block;
 }
 
-.gallery-item:hover::after {
-  content: "";
-  display: block;
+.heart-icon {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-image: url('path/to/heart-icon.png'); /* Replace with your heart icon image path */
+  width: 30px; /* Adjust the size of the heart icon as needed */
+  height: 30px;
+  background-size: cover;
+  cursor: pointer;
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s, transform 0.3s; /* Add a transition for smooth appearance */
+  z-index: 1; /* Ensure the heart icon appears above the gallery item */
 }
 
-.gallery-item:hover::after {
+.gallery-item:hover {
+  z-index: 1; /* Ensure the gallery item appears above other items */
+}
+
+.gallery-item:hover .heart-icon {
   opacity: 1;
+  transform: translate(-50%, -50%) scale(1.5); /* Move and slightly scale the heart icon on hover */
 }
