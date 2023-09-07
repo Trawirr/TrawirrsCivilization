@@ -8,4 +8,4 @@ class MapAdmin(admin.ModelAdmin):
     ordering = ("author", "name")
 
     def author_name(self, obj):
-        return obj.author.name
+        return obj.author.username

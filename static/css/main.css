@@ -190,13 +190,17 @@ img {
 }
 
 .gallery {
+  
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   max-width: 900px;
   margin: 20px auto;
   padding: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border: 20px solid #4F3A2A; /* Border color */
+  border-radius: 15px; /* Rounded corners */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6); /* Shadow effect */
+  background-color: #d4bb8b; /* Background color inside the frame */
 }
 
 .gallery-item {

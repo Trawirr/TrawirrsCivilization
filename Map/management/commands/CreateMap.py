@@ -5,6 +5,7 @@ import random
 import json
 from Map.utils.map_utils import get_tile_color, map_value, distance, get_height, scale_value, lower_height
 from Map.models import Map
+from django.contrib.auth.models import User
 
 class Command(BaseCommand):
     help = 'Creates a new map with new Tiles, Areas and Civilizations'
@@ -17,6 +18,7 @@ class Command(BaseCommand):
         parser.add_argument('-b', '--border', type=int, default=20, help='Border width')
         parser.add_argument('-sd', '--seed', type=int, default=random.randint(1, 100000), help='Map seed')
         parser.add_argument('-n', '--name', type=str, default="map", help='Map file name')
+        parser.add_argument('-u', '--username', type=str, default="root", help='Username generating a map')
 
         # reservoirs parameters
         parser.add_argument('-rn', '--riversnumber', type=int, default=5, help='Number of rivers to generate')
@@ -40,6 +42,7 @@ class Command(BaseCommand):
         riversnumber = options['riversnumber']
         depth = options['depth']
         mountain = options['mountain']
+        username = options['username']
         options_names = ["size", "octaves", "sealevel", "border", "seed", "name", "riversnumber", "depth", "mountain"]
         options_str = [f'{op} = {options[op]}' for op in options_names]
         print(f"Creating a map: {', '.join(options_str)}")
@@ -105,3 +108,10 @@ class Command(BaseCommand):
         start = time.time()
         call_command("CreateAreas", mapname=name, mountain=mountain)
         print(f"time: {time.time() - start}s\n")
+
+        try:
+            user = User.objects.get(username=username)
+        except:
+            user = User.objects.get(username='root')
+        new_map = Map(name=name, author=user)
+        new_map.save()

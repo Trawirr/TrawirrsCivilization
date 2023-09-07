@@ -9,6 +9,7 @@ from .utils.map_utils import generate_random_string, map_value, get_tile_color
 from .utils.map_json_utils import get_map_field, get_mapped_height, get_map_names
 from .utils.map_image_utils import get_pixel_color
 from .utils.biomes_utils import BiomeHandler
+from Map.models import Map
 
 def empty_view(request):
     return HttpResponse()
@@ -46,7 +47,8 @@ def generate_map(request):
                  octaves=request.GET['octaves'], 
                  sealevel=float(request.GET['sealevel']), 
                  border=int(request.GET['border']),
-                 name=map_name
+                 name=map_name,
+                 username=request.user.username
                  )
     context = {}
     return map_view(request, map_name+"_geo.png")
@@ -71,6 +73,13 @@ def get_tooltip(request):
 
 def gallery_view(request):
     context = {"maps": get_map_names()}
+    return render(request, 'gallery.html', context)
+
+@login_required
+def users_gallery_view(request):
+    user = request.user
+    context = {"maps": Map.objects.filter(author=user).values_list("name", flat=True)}
+    print(f"Users gallery: {context['maps']}")
     return render(request, 'gallery.html', context)
 
 def login_view(request):
