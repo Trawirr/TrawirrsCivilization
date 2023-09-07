@@ -2,13 +2,46 @@
 
 <div class="gallery">
     {% for map in maps %}
-    <div class="gallery-item" hx-get="/map/{{ map }}_geo.png" hx-swap="innerHTML" hx-target=".main" hx-trigger="click">
-        <img src="{% static 'images/' %}{{ map }}_geo.png" alt="{{ map }}">
+    <div class="gallery-item" hx-get="/map/{{ map }}_geo.png" hx-swap="innerHTML" hx-target=".main" hx-trigger="click target:.map_image" data-image-id="{{ map }}">
+        <img class="map_image" src="{% static 'images/' %}{{ map }}_geo.png" alt="{{ map }}">
+        <span class="heart-icon far fa-heart" hx-post="/add_to_favourites" hx-include="[name='map{{ map }}']">
+            <input type="hidden" value="{{ map }}" name="map{{ map }}">
+        </span>
     </div>
     {% endfor %}
 </div>
 
 <script>
-    var map = document.querySelector('.gallery-click');
-    htmx.process(map);
+    // document.addEventListener('click', function (event) {
+    //     const heartIcon = event.target.closest('.heart-icon'); // Find the closest ancestor with the class 'heart-icon'
+    //     console.log("Click");
+
+    //     if (heartIcon) {
+    //         console.log("Heart click");
+    //         event.stopPropagation(); // Prevent the click event from propagating to the gallery-item
+    //         const imageId = heartIcon.getAttribute('data-image-id');
+    //         const action = heartIcon.getAttribute('data-action');
+
+    //         if (action === 'add-to-favorites') {
+    //             // Perform the action to add the image to favorites
+    //             htmx.ajax({
+    //                 url: '/add_to_favorites/',
+    //                 method: 'POST',
+    //                 data: {
+    //                     image_id: imageId,
+    //                     csrfmiddlewaretoken: '{{ csrf_token }}',
+    //                 },
+    //                 headers: {
+    //                     'X-CSRFToken': '{{ csrf_token }}',
+    //                 },
+    //                 success: function (response) {
+    //                     if (response.message === 'Added to favorites successfully') {
+    //                         // Update the UI to reflect that the image is now a favorite
+    //                         heartIcon.classList.add('favorite');
+    //                     }
+    //                 },
+    //             });
+    //         }
+    //     }
+    // });
 </script>
