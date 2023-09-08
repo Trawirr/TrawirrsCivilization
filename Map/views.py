@@ -71,14 +71,16 @@ def get_tooltip(request):
 
     return HttpResponse(tooltip_content)
 
-def gallery_view(request):
+def gallery_view(request, gallery_type):
+    maps = Map.objects.all()
     if request.user.is_authenticated: 
         favourite_maps = FavouriteMap.objects.filter(user=request.user).values_list("map__name", flat=True)
     else:
         favourite_maps = []
     context = {
-        "maps": get_map_names(),
-        "favourite_maps": favourite_maps
+        "maps": maps,
+        "favourite_maps": favourite_maps,
+        'gallery_type': gallery_type,
         }
     return render(request, 'gallery.html', context)
 

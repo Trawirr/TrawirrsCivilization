@@ -1,13 +1,23 @@
 {% load static %}
-
+<div class="gallery-header">
+    <a hx-get="/gallery/all" class="gallery-link" data-filter="all"  hx-swap="innerHTML" hx-target=".main" hx-trigger="click">All</a>
+    {% if user.is_authenticated %}
+    <a hx-get="/gallery/favourites" class="gallery-link" data-filter="favorites"  hx-swap="innerHTML" hx-target=".main" hx-trigger="click">Favourite</a>
+    <a hx-get="/gallery/all" class="gallery-link" data-filter="all"  hx-swap="innerHTML" hx-target=".main" hx-trigger="click">All</a>
+    {% endif %}
+</div>
 <div class="gallery">
     {% for map in maps %}
-    <div class="gallery-item" hx-get="/map/{{ map }}_geo.png" hx-swap="innerHTML" hx-target=".main" hx-trigger="click target:.map_image" data-image-id="{{ map }}">
-        <img class="map_image" src="{% static 'images/' %}{{ map }}_geo.png" alt="{{ map }}">
-        <span class="heart-icon {% if map in favourite_maps %} fas {% else %} far {% endif %} fa-heart" hx-post="/add_to_favourites" hx-include="[name='map{{ map }}']" hx-target="this" hx-swap="outerHTML">
-            <input type="hidden" value="{{ map }}" name="map{{ map }}">
-        </span>
-    </div>
+        {% if gallery_type == 'users' and map.author == user or gallery_type == 'favourites' and map.name in favourite_maps or gallery_type == 'all' %}
+        <div class="gallery-item" hx-get="/map/{{ map.name }}_geo.png" hx-swap="innerHTML" hx-target=".main" hx-trigger="click target:.map_image" data-image-id="{{ map }}">
+            <img class="map_image" src="{% static 'images/' %}{{ map.name }}_geo.png" alt="{{ map.name }}">
+            {% if user.is_authenticated %}
+            <span class="heart-icon {% if map in favourite_maps %} fas {% else %} far {% endif %} fa-heart" hx-post="/add_to_favourites" hx-include="[name='map{{ map }}']" hx-target="this" hx-swap="outerHTML">
+                <input type="hidden" value="{{ map.name }}" name="map{{ map.name }}">
+            </span>
+            {% endif %}
+        </div>
+        {% endif %}
     {% endfor %}
 </div>
 
