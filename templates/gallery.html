@@ -4,7 +4,7 @@
     {% for map in maps %}
     <div class="gallery-item" hx-get="/map/{{ map }}_geo.png" hx-swap="innerHTML" hx-target=".main" hx-trigger="click target:.map_image" data-image-id="{{ map }}">
         <img class="map_image" src="{% static 'images/' %}{{ map }}_geo.png" alt="{{ map }}">
-        <span class="heart-icon far fa-heart" hx-post="/add_to_favourites" hx-include="[name='map{{ map }}']">
+        <span class="heart-icon {% if map in favourite_maps %} fas {% else %} far {% endif %} fa-heart" hx-post="/add_to_favourites" hx-include="[name='map{{ map }}']" hx-target="this" hx-swap="outerHTML">
             <input type="hidden" value="{{ map }}" name="map{{ map }}">
         </span>
     </div>

@@ -9,3 +9,11 @@ class MapAdmin(admin.ModelAdmin):
 
     def author_name(self, obj):
         return obj.author.username
+
+
+@admin.register(FavouriteMap)
+class FavouriteMapAdmin(admin.ModelAdmin):
+    list_display = ("map_name", "user")
+
+    def map_name(Self, obj):
+        return obj.map.name

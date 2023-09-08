@@ -9,7 +9,7 @@ from .utils.map_utils import generate_random_string, map_value, get_tile_color
 from .utils.map_json_utils import get_map_field, get_mapped_height, get_map_names
 from .utils.map_image_utils import get_pixel_color
 from .utils.biomes_utils import BiomeHandler
-from Map.models import Map
+from Map.models import Map, FavouriteMap
 
 def empty_view(request):
     return HttpResponse()
@@ -40,7 +40,6 @@ def generate_form_view(request):
 
 @login_required
 def generate_map(request):
-    print("Generating map...")
     map_name = generate_random_string()
     call_command("CreateMap", 
                  size=int(request.GET['size']),  
@@ -51,6 +50,7 @@ def generate_map(request):
                  username=request.user.username
                  )
     context = {}
+    print(f"Generate map, map name: {map_name}")
     return map_view(request, map_name+"_geo.png")
 
 def get_tooltip(request):
@@ -72,18 +72,40 @@ def get_tooltip(request):
     return HttpResponse(tooltip_content)
 
 def gallery_view(request):
-    context = {"maps": get_map_names()}
+    if request.user.is_authenticated: 
+        favourite_maps = FavouriteMap.objects.filter(user=request.user).values_list("map__name", flat=True)
+    else:
+        favourite_maps = []
+    context = {
+        "maps": get_map_names(),
+        "favourite_maps": favourite_maps
+        }
     return render(request, 'gallery.html', context)
 
 @login_required
 def users_gallery_view(request):
     user = request.user
     context = {"maps": Map.objects.filter(author=user).values_list("name", flat=True)}
-    print(f"Users gallery: {context['maps']}")
     return render(request, 'gallery.html', context)
 
+@login_required
+def add_to_favourites(request):
+    map_name = list(request.POST.keys())[0][3:]
+    selected_map = Map.objects.get(name=map_name)
+    user = request.user
+    if FavouriteMap.objects.filter(user=user, map=selected_map).count() > 0:
+        FavouriteMap.objects.get(user=user, map=selected_map).delete()
+        return HttpResponse(f"""<span class="heart-icon far fa-heart" hx-post="/add_to_favourites" hx-include="[name='map{map_name}']" hx-target="this" hx-swap="outerHTML">
+            <input type="hidden" value="{map_name}" name="map{map_name}">
+        </span>""")
+    else:
+        new_favourite_map = FavouriteMap(user=user, map=selected_map)
+        new_favourite_map.save()
+        return HttpResponse(f"""<span class="heart-icon fas fa-heart" hx-post="/add_to_favourites" hx-include="[name='map{map_name}']" hx-target="this" hx-swap="outerHTML">
+            <input type="hidden" value="{map_name}" name="map{map_name}">
+        </span>""")
+
 def login_view(request):
-    print("login view")
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']

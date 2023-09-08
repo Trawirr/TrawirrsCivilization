@@ -20,16 +20,21 @@
 </style>
 
 <script>
+console.log("map name {{ map_name }}")
 var map = document.querySelector('.map-container');
 var image = document.querySelector('#pixel-map');
 var pixelWidth = image.width / {{ map_size }};
 var pixelHeight = image.height / {{ map_size }};
+var imageRect = image.getBoundingClientRect();
 
 image.addEventListener('mousemove', (event) => {
-  const imageRect = image.getBoundingClientRect();
+  //const imageRect = image.getBoundingClientRect();
 
   const x = Math.ceil(event.offsetX / pixelWidth);
   const y = Math.ceil(event.offsetY / pixelHeight);
+
+  console.log(imageRect.left + " + " + event.offsetX, " | ", imageRect.top + " + " + event.offsetY)
+
 
   tooltip.style.left = event.offsetX + imageRect.left + 20 + 'px';
   tooltip.style.top = event.offsetY + imageRect.top + window.scrollY - 30 + 'px';
