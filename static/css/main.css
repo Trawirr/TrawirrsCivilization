@@ -225,6 +225,7 @@ img {
   background-image: url('path/to/heart-icon.png'); /* Replace with your heart icon image path */
   width: 30px; /* Adjust the size of the heart icon as needed */
   height: 30px;
+  text-align: center;
   background-size: cover;
   cursor: pointer;
   opacity: 0;
@@ -234,9 +235,35 @@ img {
 
 .gallery-item:hover {
   z-index: 1; /* Ensure the gallery item appears above other items */
+  cursor: pointer;
 }
 
 .gallery-item:hover .heart-icon {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1.5); /* Move and slightly scale the heart icon on hover */
+}
+
+.gallery-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.gallery-link {
+  display: inline-block;
+  width: 80px;
+  padding: 10px 20px;
+  margin: 0 10px;
+  text-decoration: none;
+  color: black;
+  border: 20px solid #4F3A2A; /* Border color */
+  border-radius: 15px; /* Rounded corners */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6); /* Shadow effect */
+  background-color: #d4bb8b; /* Background color inside the frame */
+  transition: background-color 0.3s, color 0.3s;
+  cursor: pointer;
+}
+
+.gallery-link:hover {
+  background-color: #d4bb8b; /* Background color on hover */
+  color: #000; /* Text color on hover */
 }
