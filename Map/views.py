@@ -92,6 +92,7 @@ def users_gallery_view(request):
 
 @login_required
 def add_to_favourites(request):
+    print(request.POST, list(request.POST.keys()), sep="\n")
     map_name = list(request.POST.keys())[0][3:]
     selected_map = Map.objects.get(name=map_name)
     user = request.user
