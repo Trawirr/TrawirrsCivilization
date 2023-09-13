@@ -267,3 +267,8 @@ img {
   background-color: #d4bb8b; /* Background color on hover */
   color: #000; /* Text color on hover */
 }
+
+.indicator-style{
+  margin: 0px 5px;
+  display: none;
+}
