@@ -4,19 +4,66 @@
         <h2>Map Generator Settings</h2>
         <form hx-get="/generate" hx-swap="innerHTML" hx-target=".image-container" hx-indicator="#spinner">
             <label for="size">Size (1-256):</label>
-            <input type="number" id="size" name="size" min="1" max="256" required><br><br>
-            
-            <label for="octaves">Octaves:</label>
-            <input type="text" id="octaves" name="octaves" required><br><br>
-            
+            <input type="range" id="size" name="size" min="1" max="256" required value="1">
+            <span id="size-value">1</span><br>
+        
             <label for="sea-level">Sea Level (0-1):</label>
-            <input type="number" id="sea-level" name="sealevel" min="0" max="1" step="0.01" required><br><br>
-            
+            <input type="range" id="sea-level" name="sealevel" min="0" max="1" step="0.01" required value="0.5">
+            <span id="sea-level-value">0.5</span><br>
+        
             <label for="border">Border (0-size):</label>
-            <input type="number" id="border" name="border" min="0" required><br><br>
-            
+            <input type="range" id="border" name="border" min="0" max="256" required value="0">
+            <span id="border-value">0</span><br>
+        
+            <label for="octaves">Octaves:</label>
+            <input type="text" id="octaves" name="octaves" required><br>
+        
+            <label for="seed">Seed (1-100000):</label>
+            <input type="number" id="seed" name="seed" min="1" max="100000" required><br>
+        
+            <label for="rivers">Number of Rivers (0-20):</label>
+            <input type="number" id="rivers" name="rivers" min="0" max="20" required><br>
+        
+            <label for="shadow-style">Shadow Style:</label>
+            <select id="shadow-style" name="shadowstyle">
+                <option value="None">None</option>
+                <option value="Const">Const</option>
+                <option value="Relational">Relational</option>
+            </select><br><br>
+        
             <button type="submit" value="Generate Map">Generate<span id="spinner" class="htmx-indicator indicator-style spinner-border spinner-border-sm"></span></button>
         </form>
+        
+        <script>
+            // Get references to the range input elements and the associated value spans
+            const sizeInput = document.getElementById("size");
+            const sizeValue = document.getElementById("size-value");
+            const octavesInput = document.getElementById("octaves");
+            const octavesValue = document.getElementById("octaves-value");
+            const seaLevelInput = document.getElementById("sea-level");
+            const seaLevelValue = document.getElementById("sea-level-value");
+            const borderInput = document.getElementById("border");
+            const borderValue = document.getElementById("border-value");
+        
+            // Add event listeners to update the value spans as the sliders change
+            sizeInput.addEventListener("input", () => {
+                sizeValue.textContent = sizeInput.value;
+            });
+        
+            octavesInput.addEventListener("input", () => {
+                octavesValue.textContent = octavesInput.value;
+            });
+        
+            seaLevelInput.addEventListener("input", () => {
+                seaLevelValue.textContent = seaLevelInput.value;
+            });
+        
+            borderInput.addEventListener("input", () => {
+                borderValue.textContent = borderInput.value;
+            });
+        </script>
+        
+        
     </div>
     <div class="image-container">
     </div>
