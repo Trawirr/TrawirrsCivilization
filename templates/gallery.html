@@ -3,7 +3,6 @@
     <a hx-get="/gallery/all" class="gallery-link" data-filter="all"  hx-swap="innerHTML" hx-target=".main" hx-trigger="click">All</a>
     {% if user.is_authenticated %}
     <a hx-get="/gallery/favourites" class="gallery-link" data-filter="favorites"  hx-swap="innerHTML" hx-target=".main" hx-trigger="click">Favourite</a>
-    <a hx-get="/gallery/all" class="gallery-link" data-filter="all"  hx-swap="innerHTML" hx-target=".main" hx-trigger="click">All</a>
     {% endif %}
 </div>
 <div class="gallery">
@@ -20,38 +19,3 @@
         {% endif %}
     {% endfor %}
 </div>
-
-<script>
-    // document.addEventListener('click', function (event) {
-    //     const heartIcon = event.target.closest('.heart-icon'); // Find the closest ancestor with the class 'heart-icon'
-    //     console.log("Click");
-
-    //     if (heartIcon) {
-    //         console.log("Heart click");
-    //         event.stopPropagation(); // Prevent the click event from propagating to the gallery-item
-    //         const imageId = heartIcon.getAttribute('data-image-id');
-    //         const action = heartIcon.getAttribute('data-action');
-
-    //         if (action === 'add-to-favorites') {
-    //             // Perform the action to add the image to favorites
-    //             htmx.ajax({
-    //                 url: '/add_to_favorites/',
-    //                 method: 'POST',
-    //                 data: {
-    //                     image_id: imageId,
-    //                     csrfmiddlewaretoken: '{{ csrf_token }}',
-    //                 },
-    //                 headers: {
-    //                     'X-CSRFToken': '{{ csrf_token }}',
-    //                 },
-    //                 success: function (response) {
-    //                     if (response.message === 'Added to favorites successfully') {
-    //                         // Update the UI to reflect that the image is now a favorite
-    //                         heartIcon.classList.add('favorite');
-    //                     }
-    //                 },
-    //             });
-    //         }
-    //     }
-    // });
-</script>
